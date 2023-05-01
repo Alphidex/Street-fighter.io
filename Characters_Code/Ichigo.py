@@ -1,5 +1,5 @@
 import pygame
-from characters import *
+from characters import Fighter, Ranged_Attack
 
 class Ichigo(Fighter):
     def __init__(self, player, x, y, flip, data, sprite_sheet, animation_steps, character_name):
@@ -464,6 +464,9 @@ class Ichigo(Fighter):
                 if self.dash:
                     self.dash = False
 
+                if self.jumping:
+                    self.jumping = False
+
     def update_action(self, new_action):
         # check if the new action is different to the previous one
         if new_action != self.action:
@@ -474,8 +477,8 @@ class Ichigo(Fighter):
 
 
     class Ranged_Ichigo(Ranged_Attack):
-        def __init__(self, flip, range_attack_animation_list, action, character_rect, character):
-            super().__init__(flip, range_attack_animation_list, action, character_rect, character)
+        def __init__(self, flip, attack_animation_list, action, character_rect, character):
+            super().__init__(flip, attack_animation_list, action, character_rect, character)
 
             # Create Rectangle
             self.rect = self.create_rectangle(character_rect)  # To check the position of the character
@@ -483,42 +486,42 @@ class Ichigo(Fighter):
         def create_rectangle(self, character_rect):
             if self.character == "Ichigo":
                 # Strong Attack Up
-                if self.range_action == 3:
-                    rect = pygame.Rect(character_rect.centerx - (150 * self.range_flip),
+                if self.action == 3:
+                    rect = pygame.Rect(character_rect.centerx - (150 * self.flip),
                                    character_rect.y - 50, 150, 1.3 * character_rect.height)
 
                 # Strong Attack Jump Attack
-                elif self.range_action == 2:
-                    rect = pygame.Rect(character_rect.centerx - (150 * self.range_flip),
+                elif self.action == 2:
+                    rect = pygame.Rect(character_rect.centerx - (150 * self.flip),
                                        character_rect.y - 50, 150, 1.3 * character_rect.height)
 
                 # Special Attack
-                elif self.range_action == 0:
-                    rect = pygame.Rect(character_rect.centerx - (150 * self.range_flip),
+                elif self.action == 0:
+                    rect = pygame.Rect(character_rect.centerx - (150 * self.flip),
                                        character_rect.y - 100, 150, 1.75 * character_rect.height)
 
                 # Special Attack Up
-                elif self.range_action == 5:
-                    rect = pygame.Rect(character_rect.centerx - 150 + (40 * self.range_flip),
+                elif self.action == 5:
+                    rect = pygame.Rect(character_rect.centerx - 150 + (40 * self.flip),
                                        character_rect.y - 50, 260, 0.7 * character_rect.height)
             return rect
 
         def draw_ranged_attack(self, surface, offset, image_scale):
             # Drawing Ranged Attacks
-            img = pygame.transform.flip(self.range_image, self.range_flip, False)
+            img = pygame.transform.flip(self.range_image, self.flip, False)
 
             if self.character == "Ichigo":
-                if self.range_action == 3:
+                if self.action == 3:
                     surface.blit(img, (
                         self.rect.x - (offset[0] * image_scale),
                         self.rect.y - ((offset[1] - 10) * image_scale)))
                     pygame.draw.rect(surface, (143, 24, 199), self.rect, 4)
-                elif self.range_action == 0:
+                elif self.action == 0:
                     surface.blit(img, (
                         self.rect.x - (offset[0] * image_scale),
                         self.rect.y - ((offset[1] - 25) * image_scale)))
                     pygame.draw.rect(surface, (143, 24, 199), self.rect, 4)
-                elif self.range_action == 5:
+                elif self.action == 5:
                     surface.blit(img, (
                         self.rect.x - (offset[0] * image_scale),
                         self.rect.y - ((offset[1] + 30) * image_scale)))
@@ -533,35 +536,35 @@ class Ichigo(Fighter):
         def update_ranged_attack(self, surface):
             animation_cooldown = 160
             # Refresh the image
-            self.range_image = self.range_attack_animation_list[self.range_action][self.range_frame_index]
+            self.range_image = self.attack_animation_list[self.action][self.frame_index]
 
             if self.character == "Ichigo":
                 # Increments the frame index
                 if (pygame.time.get_ticks() - self.update_time) > animation_cooldown:
-                    self.range_frame_index += 1
+                    self.frame_index += 1
                     self.update_time = pygame.time.get_ticks()
 
                 # If the end of the animation is reached:
-                if self.range_frame_index >= len(self.range_attack_animation_list[self.range_action]):
-                    self.range_frame_index = 0
+                if self.frame_index >= len(self.attack_animation_list[self.action]):
+                    self.frame_index = 0
 
                 #Attacks moving in different directions
-                if self.range_action == 2:
+                if self.action == 2:
                     # Image movement
-                    self.rect.x += 2 + (-4 * self.range_flip)
+                    self.rect.x += 2 + (-4 * self.flip)
                     self.rect.y += 2
 
-                elif self.range_action == 3:
+                elif self.action == 3:
                     # Image movement
-                    self.rect.x += 2 + (-4 * self.range_flip)
+                    self.rect.x += 2 + (-4 * self.flip)
                     self.rect.y -= 2
 
-                elif self.range_action == 5:
+                elif self.action == 5:
                     self.rect.y -= 2
 
                 else:
                     # Image movement
-                    self.rect.x += 2 + (-4 * self.range_flip)
+                    self.rect.x += 2 + (-4 * self.flip)
 
             if self.rect.left >= 1280 or self.rect.right <= 0:
                 self.attacking = False

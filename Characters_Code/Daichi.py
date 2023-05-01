@@ -1,5 +1,5 @@
 import pygame
-from characters import *
+from characters import Fighter, Ranged_Attack
 
 class Daichi(Fighter):
     def __init__(self, player, x, y, flip, data, sprite_sheet, animation_steps, character_name):
@@ -68,7 +68,6 @@ class Daichi(Fighter):
                 surface.blit(img, (
                     self.rect.x - (self.offset[0] * self.image_scale),
                     self.rect.y - (self.offset[1] * self.image_scale)))
-
 
     def time_passed(self):
         return pygame.time.get_ticks() - self.update_time
@@ -436,6 +435,9 @@ class Daichi(Fighter):
                 if self.dash:
                     self.dash = False
 
+                if self.jumping:
+                    self.jumping = False
+
     def update_action(self, new_action):
         # check if the new action is different to the previous one
         if new_action != self.action:
@@ -446,8 +448,8 @@ class Daichi(Fighter):
 
 
     class Ranged_Daichi(Ranged_Attack):
-        def __init__(self, flip, range_attack_animation_list, action, character_rect, character):
-            super().__init__(flip, range_attack_animation_list, action, character_rect, character)
+        def __init__(self, flip, attack_animation_list, action, character_rect, character):
+            super().__init__(flip, attack_animation_list, action, character_rect, character)
 
             # Create Rectangle
             self.rect = self.create_rectangle(character_rect)  # To check the position of the character
@@ -456,24 +458,24 @@ class Daichi(Fighter):
 
             if self.character == "Daichi":
                 # Special Attack
-                if self.range_action == 0:
-                    rect = pygame.Rect(character_rect.centerx - (2.2 * character_rect.width * self.range_flip),
+                if self.action == 0:
+                    rect = pygame.Rect(character_rect.centerx - (2.2 * character_rect.width * self.flip),
                                        character_rect.y + 10, 2.2 * character_rect.width,
                                        1.2 * character_rect.height)
 
                 # Special Attack  Down
-                if self.range_action == 1:
-                    rect = pygame.Rect(character_rect.centerx - (1.5 * character_rect.width * self.range_flip),
+                if self.action == 1:
+                    rect = pygame.Rect(character_rect.centerx - (1.5 * character_rect.width * self.flip),
                                        character_rect.y + 8, 1.5 * character_rect.width,
                                        1 * character_rect.height)
             return rect
 
         def draw_ranged_attack(self, surface, offset, image_scale):
             # Drawing Ranged Attacks
-            img = pygame.transform.flip(self.range_image, self.range_flip, False)
+            img = pygame.transform.flip(self.range_image, self.flip, False)
 
             if self.character == "Daichi":
-                if self.range_action == 0:
+                if self.action == 0:
                     surface.blit(img, (
                         self.rect.x - (offset[0] * image_scale) + 40,
                         self.rect.y - (offset[1] * image_scale) + 10))
@@ -487,40 +489,40 @@ class Daichi(Fighter):
         def update_ranged_attack(self, surface):
             animation_cooldown = 160
             # Refresh the image
-            self.range_image = self.range_attack_animation_list[self.range_action][self.range_frame_index]
+            self.range_image = self.attack_animation_list[self.action][self.frame_index]
 
             if self.character == "Daichi":
-                if self.range_action == 0 or (self.range_action == 1 and self.range_frame_index >= 1):
+                if self.action == 0 or (self.action == 1 and self.frame_index >= 1):
                     # Increments the frame index
                     if (pygame.time.get_ticks() - self.update_time) > 150:
-                        self.range_frame_index += 1
+                        self.frame_index += 1
                         self.update_time = pygame.time.get_ticks()
                 else:
                     # Increments the frame index
                     if (pygame.time.get_ticks() - self.update_time) > 300:
-                        self.range_frame_index += 1
+                        self.frame_index += 1
                         self.update_time = pygame.time.get_ticks()
 
-                if self.range_action == 0: # Special Attack
+                if self.action == 0: # Special Attack
                     if not self.collision:
                         # If the end of the animation is reached:
-                        if self.range_frame_index >= 3:
-                            self.range_frame_index = 3
+                        if self.frame_index >= 3:
+                            self.frame_index = 3
                     else:
                         # If the special attack collides, then the animation ends
-                        if self.range_frame_index >= len(self.range_attack_animation_list[self.range_action]) - 1:
-                            if self.range_flip:
+                        if self.frame_index >= len(self.attack_animation_list[self.action]) - 1:
+                            if self.flip:
                                 self.rect.left = - 200
                             else:
                                 self.rect.right = 1280 + 200
                             self.attacking = False
 
-                if self.range_action == 1:  # Special Attack Down
-                    if self.range_frame_index >= len(self.range_attack_animation_list[self.range_action]) - 1:
-                        self.range_frame_index = len(self.range_attack_animation_list[self.range_action]) - 1
+                if self.action == 1:  # Special Attack Down
+                    if self.frame_index >= len(self.attack_animation_list[self.action]) - 1:
+                        self.frame_index = len(self.attack_animation_list[self.action]) - 1
 
                 # Image movement
-                self.rect.x += 5 + (-10 * self.range_flip)
+                self.rect.x += 5 + (-10 * self.flip)
 
         def attack_collisions(self, target):
             if self.rect.colliderect(target.rect):

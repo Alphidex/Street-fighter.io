@@ -1,5 +1,5 @@
 import pygame
-from characters import *
+from characters import Fighter, Ranged_Attack
 
 class Uryu(Fighter):
     def __init__(self, player, x, y, flip, data, sprite_sheet, animation_steps, character_name):
@@ -430,6 +430,9 @@ class Uryu(Fighter):
                 if self.dash:
                     self.dash = False
 
+                if self.jumping:
+                    self.jumping = False
+
     def update_action(self, new_action):
         # check if the new action is different to the previous one
         if new_action != self.action:
@@ -440,8 +443,8 @@ class Uryu(Fighter):
 
 
     class Ranged_Uryu(Ranged_Attack):
-        def __init__(self, flip, range_attack_animation_list, action, character_rect, character):
-            super().__init__(flip, range_attack_animation_list, action, character_rect, character)
+        def __init__(self, flip, attack_animation_list, action, character_rect, character):
+            super().__init__(flip, attack_animation_list, action, character_rect, character)
 
             # Create Rectangle
             self.rect = self.create_rectangle(character_rect)  # To check the position of the character
@@ -449,56 +452,56 @@ class Uryu(Fighter):
             # Modifiers
             self.special_frameIndex_1 = 0
             self.special_frameIndex_2 = 3
-            self.special_rangeImage_1 = self.range_attack_animation_list[self.range_action][self.special_frameIndex_1]
-            self.special_rangeImage_2 = self.range_attack_animation_list[self.range_action][self.special_frameIndex_2]
+            self.special_rangeImage_1 = self.attack_animation_list[self.action][self.special_frameIndex_1]
+            self.special_rangeImage_2 = self.attack_animation_list[self.action][self.special_frameIndex_2]
 
         def create_rectangle(self, character_rect):
-            if self.range_action == 0:
-                rect = pygame.Rect(character_rect.centerx - 280 - (280 * character_rect.width * self.range_flip),
+            if self.action == 0:
+                rect = pygame.Rect(character_rect.centerx - 280 - (280 * character_rect.width * self.flip),
                                    character_rect.y - 50, 560,
                                    50 + character_rect.height)
-            elif self.range_action == 1:
-                rect = pygame.Rect(character_rect.centerx - (200 * character_rect.width * self.range_flip),
+            elif self.action == 1:
+                rect = pygame.Rect(character_rect.centerx - (200 * character_rect.width * self.flip),
                                    character_rect.y + 20, 200,
                                    0.9 * character_rect.height)
 
-            elif self.range_action == 7 or self.range_action == 11:
-                rect = pygame.Rect(character_rect.centerx - (1.4 * character_rect.width * self.range_flip),
+            elif self.action == 7 or self.action == 11:
+                rect = pygame.Rect(character_rect.centerx - (1.4 * character_rect.width * self.flip),
                                    character_rect.y + 20, 1.4 * character_rect.width,
                                    0.4 * character_rect.height)
 
-            elif self.range_action == 23:
-                rect = pygame.Rect(character_rect.centerx - (120 * self.range_flip),
+            elif self.action == 23:
+                rect = pygame.Rect(character_rect.centerx - (120 * self.flip),
                                    character_rect.y + 40, 120,
                                    0.8 * character_rect.height)
 
-            elif self.range_action == 20:
-                rect = pygame.Rect(character_rect.centerx - (120 * self.range_flip),
+            elif self.action == 20:
+                rect = pygame.Rect(character_rect.centerx - (120 * self.flip),
                                    character_rect.y - 80, 120,
                                    0.8 * character_rect.height)
 
-            elif self.range_action == 6:
-                rect = pygame.Rect(character_rect.centerx - 10 + (20 * self.range_flip),
+            elif self.action == 6:
+                rect = pygame.Rect(character_rect.centerx - 10 + (20 * self.flip),
                                    character_rect.y + character_rect.height, 60,
                                    1 * character_rect.height)
 
-            elif self.range_action == 3:
-                rect = pygame.Rect(character_rect.centerx - 20 - (20 * self.range_flip),
+            elif self.action == 3:
+                rect = pygame.Rect(character_rect.centerx - 20 - (20 * self.flip),
                                    character_rect.y - character_rect.height, 60,
                                    1 * character_rect.height)
 
-            elif self.range_action == 25:
-                rect = pygame.Rect(character_rect.centerx - (100 * self.range_flip),
+            elif self.action == 25:
+                rect = pygame.Rect(character_rect.centerx - (100 * self.flip),
                                    character_rect.y, 100,
                                    1 * character_rect.height)
 
-            elif self.range_action == 11:
-                rect = pygame.Rect(character_rect.centerx - (100 * self.range_flip),
+            elif self.action == 11:
+                rect = pygame.Rect(character_rect.centerx - (100 * self.flip),
                                    character_rect.y, 100,
                                    1 * character_rect.height)
 
             else:
-                rect = pygame.Rect(character_rect.centerx - (1.7 * character_rect.width * self.range_flip),
+                rect = pygame.Rect(character_rect.centerx - (1.7 * character_rect.width * self.flip),
                                    character_rect.y + 30, 1.9 * character_rect.width,
                                    0.7 * character_rect.height)
 
@@ -507,22 +510,22 @@ class Uryu(Fighter):
 
         def draw_ranged_attack(self, surface, offset, image_scale):
             # Drawing Ranged Attacks
-            img = pygame.transform.flip(self.range_image, self.range_flip, False)
+            img = pygame.transform.flip(self.range_image, self.flip, False)
 
             # Special Down
-            if self.range_action == 0:
+            if self.action == 0:
                 surface.blit(img, (
                     self.rect.x - ((offset[0] - 43) * image_scale),
                     self.rect.y - ((offset[1] + 17) * image_scale)))
                 pygame.draw.rect(surface, (143, 24, 199), self.rect, 4)
 
             # Special Attack
-            elif self.range_action == 1:
+            elif self.action == 1:
                 # The first effect
-                img_1 = pygame.transform.flip(self.special_rangeImage_1, self.range_flip, False)
+                img_1 = pygame.transform.flip(self.special_rangeImage_1, self.flip, False)
 
                 # The second effect
-                img_2 = pygame.transform.flip(self.special_rangeImage_2, self.range_flip, False)
+                img_2 = pygame.transform.flip(self.special_rangeImage_2, self.flip, False)
 
                 surface.blit(img_1, (
                     self.rect.x - ((offset[0] + 7) * image_scale),
@@ -535,35 +538,35 @@ class Uryu(Fighter):
                 pygame.draw.rect(surface, (143, 24, 199), self.rect, 4)
 
             # Normal Attack + Strong Attack
-            elif self.range_action == 7 or self.range_action == 11:
+            elif self.action == 7 or self.action == 11:
                 surface.blit(img, (
                     self.rect.x - (offset[0] * image_scale),
                     self.rect.y - ((offset[1] + 17) * image_scale)))
                 pygame.draw.rect(surface, (143, 24, 199), self.rect, 4)
 
             # Normal Jump Attack
-            elif self.range_action == 23 or self.range_action == 20:
+            elif self.action == 23 or self.action == 20:
                 surface.blit(img, (
                     self.rect.x - (offset[0] * image_scale),
                     self.rect.y - ((offset[1] + 5) * image_scale)))
                 pygame.draw.rect(surface, (143, 24, 199), self.rect, 4)
 
             # Strong Jump Attack
-            elif self.range_action == 6:
+            elif self.action == 6:
                 surface.blit(img, (
                     self.rect.x - ((offset[0] + 15) * image_scale),
                     self.rect.y - (offset[1] * image_scale)))
                 pygame.draw.rect(surface, (143, 24, 199), self.rect, 4)
 
             # Strong Up
-            elif self.range_action == 3:
+            elif self.action == 3:
                 surface.blit(img, (
                     self.rect.x - ((offset[0] + 15) * image_scale),
                     self.rect.y - (offset[1] * image_scale)))
                 pygame.draw.rect(surface, (143, 24, 199), self.rect, 4)
 
             # Strong Down
-            elif self.range_action == 25:
+            elif self.action == 25:
                 surface.blit(img, (
                     self.rect.x - ((offset[0] + 10) * image_scale),
                     self.rect.y - (offset[1] * image_scale)))
@@ -579,12 +582,12 @@ class Uryu(Fighter):
             animation_cooldown = 140
 
             # Refresh the image
-            self.range_image = self.range_attack_animation_list[self.range_action][self.range_frame_index]
+            self.range_image = self.attack_animation_list[self.action][self.frame_index]
 
             # Special Attack Mess-up
-            if self.range_action == 1:
-                self.special_rangeImage_1 = self.range_attack_animation_list[self.range_action][self.special_frameIndex_1]
-                self.special_rangeImage_2 = self.range_attack_animation_list[self.range_action][self.special_frameIndex_2]
+            if self.action == 1:
+                self.special_rangeImage_1 = self.attack_animation_list[self.action][self.special_frameIndex_1]
+                self.special_rangeImage_2 = self.attack_animation_list[self.action][self.special_frameIndex_2]
 
                 # Splitting the spritesheet in 2 images
                 if self.special_frameIndex_1 >= 2:
@@ -594,72 +597,72 @@ class Uryu(Fighter):
 
             # Increments the frame index
             if (pygame.time.get_ticks() - self.update_time) > animation_cooldown:
-                self.range_frame_index += 1
+                self.frame_index += 1
 
                 # Special Attack
-                if self.range_action == 1:
+                if self.action == 1:
                     self.special_frameIndex_1 += 1
                     self.special_frameIndex_2 += 1
 
                 self.update_time = pygame.time.get_ticks()
 
             # Frames Before Collision
-            if (self.range_action == 7 or self.range_action == 6 or self.range_action == 3) and not self.collision:
-                if self.range_frame_index == 3:
-                    self.range_frame_index = 0
+            if (self.action == 7 or self.action == 6 or self.action == 3) and not self.collision:
+                if self.frame_index == 3:
+                    self.frame_index = 0
 
-            if self.range_action == 11:
+            if self.action == 11:
                 if not self.collision:
-                    if self.range_frame_index >= 3:
-                        self.range_frame_index = 3
+                    if self.frame_index >= 3:
+                        self.frame_index = 3
                 else:
-                    if self.range_frame_index >= 5:
-                        self.range_frame_index = 5
+                    if self.frame_index >= 5:
+                        self.frame_index = 5
 
 
             # If the end of the animation is reached:
-            if self.range_frame_index >= len(self.range_attack_animation_list[self.range_action]):
-                self.range_frame_index = 0
+            if self.frame_index >= len(self.attack_animation_list[self.action]):
+                self.frame_index = 0
 
-                if self.range_action == 6:
+                if self.action == 6:
                     self.rect.y += 3000
-                if self.range_action == 3:
+                if self.action == 3:
                     self.rect.y -= 3000
-                if self.range_action == 25:
+                if self.action == 25:
                     self.rect.y += 5000
-                if self.range_action == 0:
+                if self.action == 0:
                     self.rect.y += 5000
 
 
             # Image movement
             # Jump Normal Attack
-            if self.range_action == 23:
-                self.rect.x += 2 + (-4 * self.range_flip)
+            if self.action == 23:
+                self.rect.x += 2 + (-4 * self.flip)
                 self.rect.y += 2
 
             # Normal Attack Up
-            elif self.range_action == 20:
-                self.rect.x += 2 + (-4 * self.range_flip)
+            elif self.action == 20:
+                self.rect.x += 2 + (-4 * self.flip)
                 self.rect.y -= 2
 
             # Jump Strong
-            elif self.range_action == 6:
+            elif self.action == 6:
                 self.rect.y += 2
 
             # Strong Up
-            elif self.range_action == 3:
+            elif self.action == 3:
                 self.rect.y -= 2
 
             # Strong Up and Special Down
-            elif self.range_action == 25 or self.range_action == 0:
+            elif self.action == 25 or self.action == 0:
                 pass
 
             else:
-                self.rect.x += 2 + (-4 * self.range_flip)
+                self.rect.x += 2 + (-4 * self.flip)
 
             # Off the screen
-            if self.range_action == 7 and self.range_frame_index == 7:
-                self.rect.x += 1500 - (3600 * self.range_flip)
+            if self.action == 7 and self.frame_index == 7:
+                self.rect.x += 1500 - (3600 * self.flip)
 
             # Boundary
             if self.rect.left >= 1280 or self.rect.right <= 0:

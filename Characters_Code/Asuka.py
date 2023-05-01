@@ -1,5 +1,5 @@
 import pygame
-from characters import *
+from characters import Fighter, Ranged_Attack
 
 class Asuka(Fighter):
     def __init__(self, player, x, y, flip, data, sprite_sheet, animation_steps, character_name):
@@ -14,7 +14,7 @@ class Asuka(Fighter):
         # Animations
         self.animation_list = self.load_images(sprite_sheet, animation_steps, "animations")
         self.projectile_list = self.load_images(sprite_sheet, animation_steps, "projectiles")
-        self.image = self.animation_list[self.action][self.frame_index]
+        self.hitbox_rect = self.test()
 
     # Extract images from Sprite Sheets
     def load_images(self, sprite_sheet, animation_steps, choice):
@@ -62,40 +62,55 @@ class Asuka(Fighter):
     def time_passed(self):
         return pygame.time.get_ticks() - self.update_time
 
-    def attack(self, surface, target):
-        # HIT-BOXES
+    def test(self):
+        # Image Rect
+        image = self.animation_list[self.action][self.frame_index]
+        image_rect = image.get_rect(bottomleft = self.rect.bottomleft)
+        image_rect.bottom = self.rect.bottom
 
-        # Normal Attack Attacks
-        if self.normal_attack:
-            self.attacking_rectangle = pygame.Rect(self.rect.centerx - (1.5 * self.rect.width * self.flip),
-                                              self.rect.y * 1.125, 1.5 * self.rect.width, 0.5 * self.rect.height)
-        elif self.normal_attack_up:
-            self.attacking_rectangle = pygame.Rect(self.rect.centerx - 150 + (20 * (not self.flip)),
-                                              self.rect.y - 20, 2.94 * self.rect.width, 1.32 * self.rect.height)
-        elif self.normal_attack_down:
-            self.attacking_rectangle = pygame.Rect(self.rect.centerx - (1.35 * self.rect.width * self.flip),
-                                              self.rect.y + 115, 1.35 * self.rect.width, 0.4 * self.rect.height)
-        # Strong Attack Attacks
-        # elif self.strong_attack:
+        # Cropped Rect
+        cropped_rect = image.get_bounding_rect()
+        cropped_rect.bottomleft = pygame.math.Vector2(image_rect.bottomleft) + pygame.math.Vector2(-35, 10)
+        cropped_rect.move_ip(image_rect.topleft)
+
+        #pygame.draw.rect(self.screen, "red", image_rect, 2)
+        pygame.draw.rect(self.screen, "gold", cropped_rect, 3)
+
+        self.attacking_rectangle = cropped_rect
+
+        return cropped_rect
+
+    def attack(self, surface, target):
+        # # HIT-BOXES
+
+        # # Normal Attack Attacks
+        # if self.normal_attack:
+        #     self.attacking_rectangle = pygame.Rect(self.rect.centerx - (1.5 * self.rect.width * self.flip),
+        #                                       self.rect.y * 1.125, 1.5 * self.rect.width, 0.5 * self.rect.height)
+        # elif self.normal_attack_up:
+        #     self.attacking_rectangle = pygame.Rect(self.rect.centerx - 150 + (20 * (not self.flip)),
+        #                                       self.rect.y - 20, 2.94 * self.rect.width, 1.32 * self.rect.height)
+        # elif self.normal_attack_down:
+        #     self.attacking_rectangle = pygame.Rect(self.rect.centerx - (1.35 * self.rect.width * self.flip),
+        #                                       self.rect.y + 115, 1.35 * self.rect.width, 0.4 * self.rect.height)
+        # # Strong Attack Attacks
+        # # elif self.strong_attack:
+        # #     self.attacking_rectangle = pygame.Rect(self.rect.centerx - (1.7 * self.rect.width * self.flip),
+        # #                                       self.rect.y * 1.125, 1.75 * self.rect.width, 0.75 * self.rect.height)
+        # elif self.strong_attack_up:
+        #     self.attacking_rectangle = pygame.Rect(self.rect.centerx - 100 + (80 * (not self.flip)),
+        #                                       self.rect.y - 20, 1.3 * self.rect.width, 1.25 * self.rect.height)
+        # elif self.strong_attack_down:
+        #     self.attacking_rectangle = pygame.Rect(self.rect.centerx - (1.74 * self.rect.width * self.flip),
+        #                                       self.rect.y, 1.74 * self.rect.width, 1 * self.rect.height)
+        # # Special Attack Attacks
+        # elif self.special_attack:
+        #     self.attacking_rectangle = pygame.Rect(self.rect.centerx - (1.7 * self.rect.width * self.flip),
+        #                                       self.rect.y * 1.115, 2 * self.rect.width, 0.87 * self.rect.height)
+        # # In case there's an error
+        # else:
         #     self.attacking_rectangle = pygame.Rect(self.rect.centerx - (1.7 * self.rect.width * self.flip),
         #                                       self.rect.y * 1.125, 1.75 * self.rect.width, 0.75 * self.rect.height)
-        elif self.strong_attack_up:
-            self.attacking_rectangle = pygame.Rect(self.rect.centerx - 100 + (80 * (not self.flip)),
-                                              self.rect.y - 20, 1.3 * self.rect.width, 1.25 * self.rect.height)
-        elif self.strong_attack_down:
-            self.attacking_rectangle = pygame.Rect(self.rect.centerx - (1.74 * self.rect.width * self.flip),
-                                              self.rect.y, 1.74 * self.rect.width, 1 * self.rect.height)
-        # Special Attack Attacks
-        elif self.special_attack:
-            self.attacking_rectangle = pygame.Rect(self.rect.centerx - (1.7 * self.rect.width * self.flip),
-                                              self.rect.y * 1.115, 2 * self.rect.width, 0.87 * self.rect.height)
-        # In case there's an error
-        else:
-            self.attacking_rectangle = pygame.Rect(self.rect.centerx - (1.7 * self.rect.width * self.flip),
-                                              self.rect.y * 1.125, 1.75 * self.rect.width, 0.75 * self.rect.height)
-
-        pygame.draw.rect(surface, (0, 255, 0), self.attacking_rectangle, 2)
-
 
         # Rectangle collisions
         if self.attacking_rectangle.colliderect(target.rect):
@@ -171,7 +186,7 @@ class Asuka(Fighter):
 
         # Normal Attacks
         elif self.normal_attack:
-            if (pygame.time.get_ticks() - self.update_time) > 60:
+            if (pygame.time.get_ticks() - self.update_time) > 300: #60:
                 self.frame_index += 1
                 self.update_time = pygame.time.get_ticks()
         elif self.normal_attack_up:
@@ -301,10 +316,6 @@ class Asuka(Fighter):
                         self.attack(surface, target)
                         self.attack_list_trigger[self.frame_index] = True
 
-        # For hit-box purposes
-        if self.attacking_rectangle != None:
-            pygame.draw.rect(surface, (0, 255, 0), self.attacking_rectangle, 2)
-
     # Update the timer and sprite animations
     def update(self, target, surface):
         if self.health <= 0:
@@ -356,6 +367,9 @@ class Asuka(Fighter):
         # Update Image ------------------------------------------
         self.image = self.animation_list[self.action][self.frame_index]
 
+        # Draw test rect
+        self.hitbox_rect = self.test()
+
         # Update the animation frame index at certain milliseconds
         self._update_animation(target)
 
@@ -397,9 +411,11 @@ class Asuka(Fighter):
                     #
                     self.special_attack = False
 
-                # If dash is finished
                 if self.dash:
                     self.dash = False
+
+                if self.jumping:
+                    self.jumping = False
 
     def update_action(self, new_action):
         # check if the new action is different to the previous one
@@ -411,88 +427,82 @@ class Asuka(Fighter):
 
 
     class Ranged_Asuka(Ranged_Attack):
-        def __init__(self, flip, range_attack_animation_list, action, character_rect, character):
-            super().__init__(flip, range_attack_animation_list, action, character_rect, character)
+        def __init__(self, flip, attack_animation_list, action, character_rect, character):
+            super().__init__(flip, attack_animation_list, action, character_rect, character)
 
             # Create Rectangle
             self.rect = self.create_rectangle(character_rect)  # To check the position of the character
 
         def create_rectangle(self, character_rect):
-            if self.character == "Asuka":
-                # Special Attack
-                if self.range_action == 0:
-                    rect = pygame.Rect(character_rect.centerx - (2.5 * character_rect.width * self.range_flip),
-                                       character_rect.y - 55, 2.5 * character_rect.width,
-                                       1.4 * character_rect.height)
+            # Special Attack
+            if self.action == 0:
+                rect = pygame.Rect(character_rect.centerx - (2.5 * character_rect.width * self.flip),
+                                   character_rect.y - 55, 2.5 * character_rect.width,
+                                   1.4 * character_rect.height)
 
-                # Strong Attack
-                if self.range_action == 1:
-                    rect = pygame.Rect(character_rect.centerx - (0.85 * character_rect.width * self.range_flip),
-                                       character_rect.y + 25, 0.85 * character_rect.width,
-                                       0.5 * character_rect.height)
-                # Aerial Attack
-                elif self.range_action == 6:
-                    rect = pygame.Rect(character_rect.centerx - (1 * character_rect.width * self.range_flip),
-                                       character_rect.y + 55, 1 * character_rect.width,
-                                       0.55 * character_rect.height)
+            # Strong Attack
+            if self.action == 1:
+                rect = pygame.Rect(character_rect.centerx - (0.85 * character_rect.width * self.flip),
+                                   character_rect.y + 25, 0.85 * character_rect.width,
+                                   0.5 * character_rect.height)
+            # Aerial Attack
+            elif self.action == 6:
+                rect = pygame.Rect(character_rect.centerx - (1 * character_rect.width * self.flip),
+                                   character_rect.y + 55, 1 * character_rect.width,
+                                   0.55 * character_rect.height)
             return rect
 
         def draw_ranged_attack(self, surface, offset, image_scale):
             # Drawing Ranged Attacks
-            img = pygame.transform.flip(self.range_image, self.range_flip, False)
-
-            if self.character == "Asuka":
-                if self.range_action == 0 and self.attacking:  # Special
-                    surface.blit(img, (
-                        self.rect.x + 35 - (offset[0] * image_scale),
-                        self.rect.y + 10 - (offset[1] * image_scale)))
-                    pygame.draw.rect(surface, (143, 24, 199), self.rect, 4)
-                elif self.range_action == 1:  # Strong
-                    surface.blit(img, (
-                        self.rect.x - (0.7 * self.rect.width * (not self.range_flip)) - (offset[0] * image_scale),
-                        self.rect.y - 70 - (offset[1] * image_scale)))
-                    pygame.draw.rect(surface, (143, 24, 199), self.rect, 4)
-                elif self.range_action == 6:  # Aerial
-                    surface.blit(img, (
-                        self.rect.x - (0.5 * self.rect.width * (not self.range_flip)) - (offset[0] * image_scale),
-                        self.rect.y - 60 - (offset[1] * image_scale)))
-                    pygame.draw.rect(surface, (143, 24, 199), self.rect, 4)
+            img = pygame.transform.flip(self.range_image, self.flip, False)
+            if self.action == 0 and self.attacking:  # Special
+                surface.blit(img, (
+                    self.rect.x + 35 - (offset[0] * image_scale),
+                    self.rect.y + 10 - (offset[1] * image_scale)))
+                pygame.draw.rect(surface, (143, 24, 199), self.rect, 4)
+            elif self.action == 1:  # Strong
+                surface.blit(img, (
+                    self.rect.x - (0.7 * self.rect.width * (not self.flip)) - (offset[0] * image_scale),
+                    self.rect.y - 70 - (offset[1] * image_scale)))
+                pygame.draw.rect(surface, (143, 24, 199), self.rect, 4)
+            elif self.action == 6:  # Aerial
+                surface.blit(img, (
+                    self.rect.x - (0.5 * self.rect.width * (not self.flip)) - (offset[0] * image_scale),
+                    self.rect.y - 60 - (offset[1] * image_scale)))
+                pygame.draw.rect(surface, (143, 24, 199), self.rect, 4)
 
         def update_ranged_attack(self, surface):
             animation_cooldown = 160
             # Refresh the image
-            self.range_image = self.range_attack_animation_list[self.range_action][self.range_frame_index]
+            self.range_image = self.attack_animation_list[self.action][self.frame_index]
+            # Increments the frame index
+            if (pygame.time.get_ticks() - self.update_time) > animation_cooldown:
+                self.frame_index += 1
+                self.update_time = pygame.time.get_ticks()
 
-            # Frame Effects
-            if self.character == "Asuka":
-                # Increments the frame index
-                if (pygame.time.get_ticks() - self.update_time) > animation_cooldown:
-                    self.range_frame_index += 1
-                    self.update_time = pygame.time.get_ticks()
-
-                if self.range_action == 0:  # If Special Attack
-                    # If no collision
-                    if not self.collision:
-                        if self.range_frame_index >= 3:
-                            self.range_frame_index = 0
-                    else:
-                        # If the special attack collides, then the animation ends
-                        if self.range_frame_index >= len(self.range_attack_animation_list[self.range_action]) - 1:
-                            if self.range_flip:
-                                self.rect.left = - 200
-                            else:
-                                self.rect.right = 1280 + 200
-                            self.attacking = False
+            if self.action == 0:  # If Special Attack
+                # If no collision
+                if not self.collision:
+                    if self.frame_index >= 3:
+                        self.frame_index = 0
                 else:
-                    # If the end of the animation is reached:
-                    if self.range_frame_index >= len(self.range_attack_animation_list[self.range_action]) - 2:
-                        self.range_frame_index = len(self.range_attack_animation_list[self.range_action]) - 2
+                    # If the special attack collides, then the animation ends
+                    if self.frame_index >= len(self.attack_animation_list[self.action]) - 1:
+                        if self.flip:
+                            self.rect.left = - 200
+                        else:
+                            self.rect.right = 1280 + 200
+                        self.attacking = False
+            else:
+                # If the end of the animation is reached:
+                if self.frame_index >= len(self.attack_animation_list[self.action]) - 2:
+                    self.frame_index = len(self.attack_animation_list[self.action]) - 2
 
-                if self.range_action == 0 and self.collision == True:
-                    self.rect.x += 8 + (-16 * self.range_flip)
-                else:
-                    # Image movement
-                    self.rect.x += 15 + (-30 * self.range_flip)
+            if self.action == 0 and self.collision == True:
+                self.rect.x += 8 + (-16 * self.flip)
+            else:
+                # Image movement
+                self.rect.x += 15 + (-30 * self.flip)
 
         def attack_collisions(self, target):
             if self.rect.colliderect(target.rect):

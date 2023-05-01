@@ -1,5 +1,5 @@
 import pygame
-from characters import *
+from characters import Fighter, Ranged_Attack
 
 class Renji(Fighter):
     def __init__(self, player, x, y, flip, data, sprite_sheet, animation_steps, character_name):
@@ -508,6 +508,9 @@ class Renji(Fighter):
                 # If dash is finished
                 if self.dash:
                     self.dash = False
+
+                if self.jumping:
+                    self.jumping = False
 
     def update_action(self, new_action):
         # check if the new action is different to the previous one

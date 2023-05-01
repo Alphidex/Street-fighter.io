@@ -1,5 +1,5 @@
 import pygame
-from characters import *
+from characters import Fighter, Ranged_Attack
 
 class Zoro(Fighter):
     def __init__(self, player, x, y, flip, data, sprite_sheet, animation_steps, character_name):
@@ -355,7 +355,6 @@ class Zoro(Fighter):
         if self.attacking_rectangle != None:
             pygame.draw.rect(surface, (0, 255, 0), self.attacking_rectangle, 2)
 
-
     # Update the timer and sprite animations
     def update(self, target, surface):
         # print(player + " Action:", self.action, "\n Frame Index:", self.frame_index, "\n\n") -- For Debugging
@@ -421,7 +420,6 @@ class Zoro(Fighter):
         # If the end of animation is reached ...
         self.end_of_animation()
 
-
     def end_of_animation(self):
         # If the end of the animation is reached
         if self.frame_index >= len(self.animation_list[self.action]):
@@ -461,6 +459,9 @@ class Zoro(Fighter):
                 if self.dash:
                     self.dash = False
 
+                if self.jumping:
+                    self.jumping = False
+
     def update_action(self, new_action):
         # check if the new action is different to the previous one
         if new_action != self.action:
@@ -471,8 +472,8 @@ class Zoro(Fighter):
 
 
     class Ranged_Zoro(Ranged_Attack):
-        def __init__(self, flip, range_attack_animation_list, action, character_rect, character):
-            super().__init__(flip, range_attack_animation_list, action, character_rect, character)
+        def __init__(self, flip, attack_animation_list, action, character_rect, character):
+            super().__init__(flip, attack_animation_list, action, character_rect, character)
 
             # Create Rectangle
             self.rect = self.create_rectangle(character_rect)  # To check the position of the character
@@ -480,13 +481,13 @@ class Zoro(Fighter):
         def create_rectangle(self, character_rect):
             if self.character == "Zoro":
                 # Strong Attack
-                if self.range_action == 4:
-                    rect = pygame.Rect(character_rect.centerx - (1.7 * character_rect.width * self.range_flip),
+                if self.action == 4:
+                    rect = pygame.Rect(character_rect.centerx - (1.7 * character_rect.width * self.flip),
                                                                   character_rect.y + 50, 1.83 * character_rect.width,
                                                                   0.5 * character_rect.height)
                 # Special Attack
-                elif self.range_action == 8:
-                    rect = pygame.Rect(character_rect.centerx - (1.7 * character_rect.width * self.range_flip),
+                elif self.action == 8:
+                    rect = pygame.Rect(character_rect.centerx - (1.7 * character_rect.width * self.flip),
                                        character_rect.y + 30, 1.9 * character_rect.width,
                                        0.7 * character_rect.height)
 
@@ -494,15 +495,15 @@ class Zoro(Fighter):
 
         def draw_ranged_attack(self, surface, offset, image_scale):
             # Drawing Ranged Attacks
-            img = pygame.transform.flip(self.range_image, self.range_flip, False)
+            img = pygame.transform.flip(self.range_image, self.flip, False)
 
             if self.character == "Zoro":
-                if self.range_action == 4:
+                if self.action == 4:
                     surface.blit(img, (
                         self.rect.x - (offset[0] * image_scale),
                         self.rect.y - 70 - (offset[1] * image_scale)))
                     pygame.draw.rect(surface, (143, 24, 199), self.rect, 4)
-                elif self.range_action == 8:
+                elif self.action == 8:
                     surface.blit(img, (
                         self.rect.x - (offset[0] * image_scale),
                         self.rect.y - 50 - (offset[1] * image_scale)))
@@ -523,20 +524,20 @@ class Zoro(Fighter):
         def update_ranged_attack(self, surface):
             animation_cooldown = 160
             # Refresh the image
-            self.range_image = self.range_attack_animation_list[self.range_action][self.range_frame_index]
+            self.range_image = self.attack_animation_list[self.action][self.frame_index]
 
             if self.character == "Zoro":
                 # Increments the frame index
                 if (pygame.time.get_ticks() - self.update_time) > animation_cooldown:
-                    self.range_frame_index += 1
+                    self.frame_index += 1
                     self.update_time = pygame.time.get_ticks()
 
                 # If the end of the animation is reached:
-                if self.range_frame_index >= len(self.range_attack_animation_list[self.range_action]):
-                    self.range_frame_index = 0
+                if self.frame_index >= len(self.attack_animation_list[self.action]):
+                    self.frame_index = 0
 
                 # Image movement
-                self.rect.x += 15 + (-30 * self.range_flip)
+                self.rect.x += 15 + (-30 * self.flip)
 
             if self.rect.left >= 1280 or self.rect.right <= 0:
                 self.attacking = False

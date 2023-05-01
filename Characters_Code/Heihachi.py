@@ -1,5 +1,5 @@
 import pygame
-from characters import *
+from characters import Fighter, Ranged_Attack
 
 class Heihachi(Fighter):
     def __init__(self, player, x, y, flip, data, sprite_sheet, animation_steps, character_name):
@@ -473,6 +473,9 @@ class Heihachi(Fighter):
                 if self.dash:
                     self.dash = False
 
+                if self.jumping:
+                    self.jumping = False
+
     def update_action(self, new_action):
         # check if the new action is different to the previous one
         if new_action != self.action:
@@ -483,8 +486,8 @@ class Heihachi(Fighter):
 
 
     class Ranged_Heihachi(Ranged_Attack):
-        def __init__(self, flip, range_attack_animation_list, action, character_rect, character):
-            super().__init__(flip, range_attack_animation_list, action, character_rect, character)
+        def __init__(self, flip, attack_animation_list, action, character_rect, character):
+            super().__init__(flip, attack_animation_list, action, character_rect, character)
 
             # Create Rectangle
             self.rect = self.create_rectangle(character_rect)  # To check the position of the character
@@ -493,36 +496,36 @@ class Heihachi(Fighter):
 
             if self.character == "Heihachi":
                 # Special Attack
-                if self.range_action == 3:
-                    rect = pygame.Rect(character_rect.centerx + 10 - (2 * character_rect.width * self.range_flip),
+                if self.action == 3:
+                    rect = pygame.Rect(character_rect.centerx + 10 - (2 * character_rect.width * self.flip),
                                        character_rect.y + 5, 1.8 * character_rect.width,
                                        0.9 * character_rect.height)
 
                 # Special Attack Down
-                if self.range_action == 0:
-                    rect = pygame.Rect(character_rect.centerx - (230 * self.range_flip),
+                if self.action == 0:
+                    rect = pygame.Rect(character_rect.centerx - (230 * self.flip),
                                        character_rect.y - 75, 230,
                                        75 + character_rect.height)
 
                 # Strong Attack Up
-                if self.range_action == 2:
-                    rect = pygame.Rect(character_rect.centerx - (1.4 * character_rect.width * self.range_flip),
+                if self.action == 2:
+                    rect = pygame.Rect(character_rect.centerx - (1.4 * character_rect.width * self.flip),
                                        character_rect.y + 15, 1.4 * character_rect.width,
                                        15 + character_rect.height)
 
                 # Strong Attack Down
-                if self.range_action == 4:
-                    rect = pygame.Rect(character_rect.centerx - (1.5 * character_rect.width * self.range_flip),
+                if self.action == 4:
+                    rect = pygame.Rect(character_rect.centerx - (1.5 * character_rect.width * self.flip),
                                        character_rect.y + 8, 1.5 * character_rect.width,
                                            1 * character_rect.height)
             return rect
 
         def draw_ranged_attack(self, surface, offset, image_scale):
             # Drawing Ranged Attacks
-            img = pygame.transform.flip(self.range_image, self.range_flip, False)
+            img = pygame.transform.flip(self.range_image, self.flip, False)
 
             if self.character == "Heihachi":
-                if self.range_action == 0:
+                if self.action == 0:
                     surface.blit(img, (
                         self.rect.x - (offset[0] * image_scale + 150),
                         self.rect.y - (offset[1] * image_scale + 85)))
@@ -537,42 +540,42 @@ class Heihachi(Fighter):
         def update_ranged_attack(self, surface):
             animation_cooldown = 160
             # Refresh the image
-            self.range_image = self.range_attack_animation_list[self.range_action][self.range_frame_index]
+            self.range_image = self.attack_animation_list[self.action][self.frame_index]
 
             if self.character == "Heihachi":
                 # Increments the frame index
-                if self.range_action == 2:  # Strong Attack Up
+                if self.action == 2:  # Strong Attack Up
                     if (pygame.time.get_ticks() - self.update_time) > 120:
-                        self.range_frame_index += 1
+                        self.frame_index += 1
                         self.update_time = pygame.time.get_ticks()
 
                     # If the end of the animation is reached:
-                    if self.range_frame_index >= len(self.range_attack_animation_list[self.range_action]):
-                        self.range_frame_index -= 1
-                        if self.range_flip:
+                    if self.frame_index >= len(self.attack_animation_list[self.action]):
+                        self.frame_index -= 1
+                        if self.flip:
                             self.rect.left = - 800
                         else:
                             self.rect.right = 1280 + 800
 
-                elif self.range_action == 3:  # Special Attack
+                elif self.action == 3:  # Special Attack
                     # Increments the frame index
                     if (pygame.time.get_ticks() - self.update_time) > 180:
-                        self.range_frame_index += 1
+                        self.frame_index += 1
                         self.update_time = pygame.time.get_ticks()
 
                     # If the end of the animation is reached:
-                    if self.range_frame_index >= len(self.range_attack_animation_list[self.range_action]):
-                        self.range_frame_index = len(self.range_attack_animation_list[self.range_action]) - 1
-                elif self.range_action == 0:  # Special Attack Down
+                    if self.frame_index >= len(self.attack_animation_list[self.action]):
+                        self.frame_index = len(self.attack_animation_list[self.action]) - 1
+                elif self.action == 0:  # Special Attack Down
                     # Increments the frame index
                     if (pygame.time.get_ticks() - self.update_time) > 180:
-                        self.range_frame_index += 1
+                        self.frame_index += 1
                         self.update_time = pygame.time.get_ticks()
 
                     # If the end of the animation is reached:
-                    if self.range_frame_index >= len(self.range_attack_animation_list[self.range_action]):
-                        self.range_frame_index -= 1
-                        if self.range_flip:
+                    if self.frame_index >= len(self.attack_animation_list[self.action]):
+                        self.frame_index -= 1
+                        if self.flip:
                             self.rect.left = - 800
                         else:
                             self.rect.right = 1280 + 800
@@ -580,19 +583,19 @@ class Heihachi(Fighter):
                 else:
                     # Strong Attack Down
                     if (pygame.time.get_ticks() - self.update_time) > 150:
-                        self.range_frame_index += 1
+                        self.frame_index += 1
                         self.update_time = pygame.time.get_ticks()
 
                     # If the end of the animation is reached:
-                    if self.range_frame_index >= len(self.range_attack_animation_list[self.range_action]):
-                        self.range_frame_index -= 1
-                        if self.range_flip:
+                    if self.frame_index >= len(self.attack_animation_list[self.action]):
+                        self.frame_index -= 1
+                        if self.flip:
                             self.rect.left = - 800
                         else:
                             self.rect.right = 1280 + 800
 
                 # Image movement
-                self.rect.x += 2 + (-4 * self.range_flip)
+                self.rect.x += 2 + (-4 * self.flip)
 
         def attack_collisions(self, target):
             if self.rect.colliderect(target.rect):

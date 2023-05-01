@@ -1,4 +1,7 @@
 import pygame
+import pygame.sprite
+
+from debug import debug
 
 """ 
 To Fix:
@@ -19,42 +22,61 @@ Combo logic:
 
 
 # Fighter has to be generalised
-class Fighter:
+class Fighter(pygame.sprite.Sprite):
     def __init__(self, player, x, y, flip, data, sprite_sheet, animation_steps, character_name):
-        # Data
+        super().__init__()
+        # Fighter Data
         self.player = player
+        self.opponent = None
         self.name = character_name
         self.health = 100
         self.flip = flip
+        self.control_keys = {
+            "player_1": {"right": pygame.K_d, "left": pygame.K_a, "up": pygame.K_w, "down": pygame.K_s,
+                         "normal_attack": pygame.K_j, "jump": pygame.K_k, "dash": pygame.K_l, "block": pygame.K_s,
+                         "strong_attack": pygame.K_u, "special_attack": pygame.K_i, "assist": pygame.K_o},
+            "player_2": {"right": pygame.K_RIGHT, "left": pygame.K_LEFT, "up": pygame.K_UP, "down": pygame.K_DOWN,
+                         "normal_attack": pygame.K_f, "jump": pygame.K_g, "dash": pygame.K_h, "block": pygame.K_DOWN,
+                         "strong_attack": pygame.K_r, "special_attack": pygame.K_t, "assist": pygame.K_y}}
+        # Fighter Status
         self.hit = False
         self.knockback = False
         self.dead = False
         self.block = False
 
-        # Image size and rendering onto the screen
+        # Display
+        self.screen = pygame.display.get_surface()
+
+        # Fighter Image Data
         self.image_scale = data[2]
         self.size = data[:2]  # Create a list for the first 2 items
         self.offset = data[3]
+        self.frame_index = 0
+        self.action = 3
+        self.animation_list = self.load_images(sprite_sheet, animation_steps, "animations")
+        self.image = self.get_current_image()
 
-        # Drawing rect and gravity
-        self.rect = pygame.Rect((x, y, 100, 143))
+        # Fighter Rect
+        self.rect = self.image.get_rect(topleft=(x, y))
+        self.rect.width, self.rect.height = 100, 143
+
+        # Gravity
         self.vel_y = 0  # Keeps track of speed when the character is accelerating down due to gravity
 
         # Movement
         self.running = False
         self.dash = False
-        self.jump = [False, False]  # First Jump, Second Jump
+        self.jump = [False, False]
+        self.jumping = False
 
-        # Attacks ---
+        # Attacks
         self.attacking = False
         self.attack_list_trigger = [False]
         self.attacking_rectangle = None
-
         # Ranged Attacks
         self.ranged_attack_instance_list = []
         self.range_attack = False
-
-        # Normal Attack Attacks
+        # Normal Attacks
         self.normal_attack = False
         self.normal_attack_forward = False
         self.normal_attack_up = False
@@ -63,21 +85,45 @@ class Fighter:
         # Normal Attack Combo
         self.normal_combo_timer = pygame.time.get_ticks()
         self.normal_combo_count = 0
-        # Strong Attack Attacks
+        # Strong Attacks
         self.strong_attack = False
         self.strong_attack_up = False
         self.strong_attack_down = False
         self.strong_jump_attack = False
-        # Special Attack Attacks
+        # Special Attacks
         self.special_attack = False
         self.special_attack_up = False
         self.special_attack_down = False
-        # Clock
-        self.update_time = pygame.time.get_ticks()
+        # Cooldown
         self.attack_cooldown = 0
 
-    def borders(self, SCREEN_WIDTH, SCREEN_HEIGHT, dx, dy, rect_bg_0, rect_bg_1):
-        # Setting up borders
+        # Clock
+        self.update_time = pygame.time.get_ticks()
+
+    def set_opponent(self, opponent):
+        self.opponent = opponent
+
+    def run(self, target):
+        self.draw(self.screen)
+        self.move(target)
+        self.update(target, self.screen)
+
+    def draw(self, screen):
+        pass
+
+    def update(self, target, screen):
+        pass
+
+    def draw_character_rect(self):
+        pygame.draw.rect(self.screen, "green", self.rect, 3)
+
+    def get_current_image(self):
+        return self.animation_list[self.action][self.frame_index]
+
+    def load_images(self, x, y, z):
+        pass
+
+    def borders(self, SCREEN_WIDTH, SCREEN_HEIGHT, dx, dy):
         # For x Variable
         if self.rect.left + dx < 0:
             dx = 0 - self.rect.left
@@ -90,228 +136,111 @@ class Fighter:
             dy = 550 - self.rect.bottom
             self.jump[0], self.jump[1] = False, False
 
-        # *** Need to fix the thing with teleporting on the platforms ***
-        # First Platform
-        if (self.rect.bottom + dy > rect_bg_0.top - 10) and (rect_bg_0.top - 10 < self.rect.bottom < rect_bg_0.bottom):
-            if (self.rect.midbottom[0] > rect_bg_0.topleft[0]) and (self.rect.midbottom[0] < rect_bg_0.topright[0]):
-                self.vel_y = 0
-                dy = rect_bg_0.top - self.rect.bottom + 2
-                self.jump[0], self.jump[1] = False, False
-
-        # Second Platform
-        if (self.rect.bottom + dy > rect_bg_1.top - 10) and (rect_bg_1.top - 10 < self.rect.bottom < rect_bg_1.bottom):
-            if (self.rect.midbottom[0] > rect_bg_1.topleft[0]) and (self.rect.midbottom[0] < rect_bg_1.topright[0]):
-                self.vel_y = 0
-                dy = rect_bg_1.top - self.rect.bottom + 2
-                self.jump[0], self.jump[1] = False, False
-
         return dx, dy
 
     def time_passed(self):
         return pygame.time.get_ticks() - self.update_time
 
-    def move(self, SCREEN_WIDTH, SCREEN_HEIGHT, surface, target, rect_bg_0, rect_bg_1, FPS):
-        SPEED = 7
-        GRAVITY = 2  # Acceleration downward
-        dx = 0
-        dy = 0
-
+    def check_key_presses(self, key, dx, SPEED):
         # Checking if character is in air
         if self.rect.bottom < 550:
             chr_in_air = True
         else:
             chr_in_air = False
 
-        self.running = False
-        # --------------  Here i removed attacking = False ------------
-
-        # Get key presses
-        key = pygame.key.get_pressed()
-
         if not self.dead:
-            # Controls for the first player
-            if self.player == 1:
-                # If you attack then you can't perform another action - gonna change
-                if not self.attacking:
-                    # MOVEMENT
-                    if key[pygame.K_a]:
-                        dx -= SPEED
-                        self.running = True
-                    if key[pygame.K_d]:
-                        dx += SPEED
-                        self.running = True
+            for dic_key in self.control_keys.keys():
+                player = "player_" + str(self.player)
+                if player == dic_key:
+                    # If you attack then you can't perform another action - gonna change
+                    if not self.attacking:
+                        # MOVEMENT
+                        if key[self.control_keys[player]["left"]]:
+                            dx -= SPEED
+                            self.running = True
+                        if key[self.control_keys[player]["right"]]:
+                            dx += SPEED
+                            self.running = True
 
-                    # Dodging
-                    if key[pygame.K_l]:
-                        self.dash = True
+                        # Dodging
+                        if key[self.control_keys[player]["dash"]]:
+                            self.dash = True
 
-                    # JUMPING
-                    # Make sure to try it using pygame.key.get_pressed() and delay the continous presses
+                        # Jumping
+                        if key[self.control_keys[player]["jump"]]:
+                            if self.jump[1] == False:
+                                if self.jump[0] == False:
+                                    self.jump[0] = True
+                                else:
+                                    self.jump[1] = True
+                                self.vel_y = -30
+                                self.jumping = True
 
-                    # Blocking
-                    if key[pygame.K_s] and (not chr_in_air):
-                        self.block = True
-                    else:
-                        self.block = False
+                        # Blocking
+                        if key[self.control_keys[player]["block"]] and (not chr_in_air):
+                            self.block = True
+                        else:
+                            self.block = False
 
-                    # ATTACKS
-                    if key[pygame.K_j] or key[pygame.K_u] or key[pygame.K_i]:
-                        self.attacking = True
+                        # ATTACKS
+                        if key[self.control_keys[player]["normal_attack"]] \
+                                or key[self.control_keys[player]["strong_attack"]] \
+                                or key[self.control_keys[player]["special_attack"]]:
 
-                        # Normal Attack Attacks
-                        if key[pygame.K_j]:
-                            if chr_in_air:
-                                self.normal_jump_attack = True
-                            elif key[pygame.K_s]:
-                                self.normal_attack_down = True
-                            elif key[pygame.K_w]:
-                                self.normal_attack_up = True
-                            else:
-                                #Combo attacks
+                            self.attacking = True
 
-                                # Update module (preparation)
-                                if pygame.time.get_ticks() - self.normal_combo_timer >= 1200 or\
-                                        self.normal_combo_count >= 3:
-                                    self.normal_combo_count = 0
+                            # Normal Attack Attacks
+                            if key[self.control_keys[player]["normal_attack"]]:
+                                if chr_in_air:
+                                    self.normal_jump_attack = True
+                                elif key[self.control_keys[player]["down"]]:
+                                    self.normal_attack_down = True
+                                elif key[self.control_keys[player]["up"]]:
+                                    self.normal_attack_up = True
+                                else:
+                                    # Combo attacks
+                                    # Update module (preparation)
+                                    if pygame.time.get_ticks() - self.normal_combo_timer >= 1200 or \
+                                            self.normal_combo_count >= 3:
+                                        self.normal_combo_count = 0
+                                        self.normal_combo_timer = pygame.time.get_ticks()
+
+                                    # Logic
+                                    if self.normal_combo_count == 0:
+                                        self.normal_attack = True
+                                    if pygame.time.get_ticks() - self.normal_combo_timer < 1200:
+                                        if self.normal_combo_count == 1:
+                                            self.normal_attack_down = True
+                                        elif self.normal_combo_count == 2:
+                                            self.normal_attack_up = True
+                                    self.normal_combo_count += 1
                                     self.normal_combo_timer = pygame.time.get_ticks()
 
-                                # Logic
-                                if self.normal_combo_count == 0:
-                                    self.normal_attack = True
-                                if pygame.time.get_ticks() - self.normal_combo_timer < 1200:
-                                    if self.normal_combo_count == 1:
-                                        self.normal_attack_down = True
-                                    elif self.normal_combo_count == 2:
-                                        self.normal_attack_up = True
-                                self.normal_combo_count += 1
-                                self.normal_combo_timer = pygame.time.get_ticks()
+                            # Strong Attack Attacks
+                            if key[self.control_keys[player]["strong_attack"]]:
+                                if chr_in_air:
+                                    self.strong_jump_attack = True
+                                elif key[self.control_keys[player]["down"]]:
+                                    self.strong_attack_down = True
+                                elif key[self.control_keys[player]["up"]]:
+                                    self.strong_attack_up = True
+                                else:
+                                    self.strong_attack = True
 
-                        # Strong Attack Attacks
-                        if key[pygame.K_u]:
-                            if chr_in_air:
-                                self.strong_jump_attack = True
-                            elif key[pygame.K_s]:
-                                self.strong_attack_down = True
-                            elif key[pygame.K_w]:
-                                self.strong_attack_up = True
-                            else:
-                                self.strong_attack = True
+                            # Special Attack Attacks
+                            if key[self.control_keys[player]["special_attack"]]:
+                                if key[self.control_keys[player]["down"]]:
+                                    self.special_attack_down = True
+                                elif key[self.control_keys[player]["up"]]:
+                                    self.special_attack_up = True
+                                else:
+                                    self.special_attack = True
 
-                        # Special Attack Attacks
-                        if key[pygame.K_i]:
-                            if key[pygame.K_s]:
-                                self.special_attack_down = True
-                            elif key[pygame.K_w]:
-                                self.special_attack_up = True
-                            else:
-                                self.special_attack = True
+                            # Update the attack_list_trigger
+                            self.attack_list_trigger *= 50
+        return dx
 
-                        # Update the attack_list_trigger
-                        self.attack_list_trigger *= 50
-
-            # Controls for player 2
-            if self.player == 2:
-                # If you attack then you can't perform another action - gonna change
-                if not self.attacking:
-                    # MOVEMENT
-                    if key[pygame.K_LEFT]:
-                        dx -= SPEED
-                        self.running = True
-                    if key[pygame.K_RIGHT]:
-                        dx += SPEED
-                        self.running = True
-
-                    # Dodging
-                    if key[pygame.K_m]:
-                        self.dash = True
-
-                    # JUMPING
-                    # Make sure to try it using pygame.key.get_pressed() and delay the continous presses
-
-                    # Blocking
-                    if key[pygame.K_DOWN] and (not chr_in_air):
-                        self.block = True
-                    else:
-                        self.block = False
-
-                    # ATTACKS
-                    if key[pygame.K_b] or key[pygame.K_g] or key[pygame.K_h]:
-                        self.attacking = True
-
-                        # Normal Attack Attacks
-                        if key[pygame.K_b]:
-                            if chr_in_air:
-                                self.normal_jump_attack = True
-                            elif key[pygame.K_DOWN]:
-                                self.normal_attack_down = True
-                            elif key[pygame.K_UP]:
-                                self.normal_attack_up = True
-                            else:
-                                #Combo attacks
-
-                                # Update module (preparation)
-                                if pygame.time.get_ticks() - self.normal_combo_timer >= 1200 or\
-                                        self.normal_combo_count >= 3:
-                                    self.normal_combo_count = 0
-                                    self.normal_combo_timer = pygame.time.get_ticks()
-
-                                # Logic
-                                if self.normal_combo_count == 0:
-                                    self.normal_attack = True
-                                if pygame.time.get_ticks() - self.normal_combo_timer < 1200:
-                                    if self.normal_combo_count == 1:
-                                        self.normal_attack_down = True
-                                    elif self.normal_combo_count == 2:
-                                        self.normal_attack_up = True
-                                self.normal_combo_count += 1
-                                self.normal_combo_timer = pygame.time.get_ticks()
-
-
-                        # Strong Attack Attacks
-                        if key[pygame.K_g]:
-                            if chr_in_air:
-                                self.strong_jump_attack = True
-                            elif key[pygame.K_DOWN]:
-                                self.strong_attack_down = True
-                            elif key[pygame.K_UP]:
-                                self.strong_attack_up = True
-                            else:
-                                self.strong_attack = True
-
-                        # Special Attack Attacks
-                        if key[pygame.K_h]:
-                            if key[pygame.K_DOWN]:
-                                self.special_attack_down = True
-                            elif key[pygame.K_UP]:
-                                self.special_attack_up = True
-                            else:
-                                self.special_attack = True
-
-                        # Update the attack_list_trigger
-                        self.attack_list_trigger *= 50
-
-        # Apply PHYSICS - NOTE: DON'T FORGET TO EXPERIMENT
-
-        # Basically the target's gravity would be 0 for as long as he's attacked
-        if self.name == "Zoro":
-            if target.hit:
-                if self.strong_attack_up:
-                    target.vel_y = 0
-
-        # Vel_y is a constant that keeps increasing by 2 through each iteration and resets to 0 when player touches
-        # ground (something like acceleration where each second speed increases by 2 pixels)
-        self.vel_y += GRAVITY
-        dy += self.vel_y
-
-        # Attacking in air, holds you in air
-        if self.normal_jump_attack or self.strong_jump_attack:
-            dy = 0
-            self.vel_y = 0
-
-        # dx and dy are returned once calculations are done
-        dx, dy = self.borders(SCREEN_WIDTH, SCREEN_HEIGHT, dx, dy, rect_bg_0, rect_bg_1)
-
-
+    def direction_system(self, key, target):
         # Ensure players face each other but not when moving
         if not self.dead:
             # Dash and Movement are separate
@@ -352,30 +281,54 @@ class Fighter:
             if self.dash:
                 self.rect.x += 30 + (-60 * self.flip)
 
+    def move(self, target):
+        # Variables
+        SPEED = 7
+        GRAVITY = 2
+        dx = 0
+        dy = 0
+        self.running = False
+        key = pygame.key.get_pressed()
+
+        self.draw_character_rect()
+        dx = self.check_key_presses(key, dx, SPEED)
+
+        # Define Gravity
+        self.vel_y += GRAVITY
+        dy += self.vel_y
+
+        # Attacking in air, holds you in air
+        if self.normal_jump_attack or self.strong_jump_attack:
+            dy = 0
+            self.vel_y = 0
+
+        # dx and dy are returned once calculations are done
+        dx, dy = self.borders(self.screen.get_width(), self.screen.get_height(), dx, dy)
+
+        self.direction_system(key, target)
 
         # UPDATE POSITION OF RECTANGLE
         self.rect.x += dx
         self.rect.y += dy
 
-
 class Ranged_Attack:
-    def __init__(self, flip, range_attack_animation_list, action, character_rect, character):
+    def __init__(self, flip, attack_animation_list, action, character_rect, character):
         # Data
         self.character = character
-        self.range_flip = flip
+        self.flip = flip
         self.attacking = True
 
         # Ranged Attacks
-        self.range_attack_rect_list = []
-        self.ranged_attacking_rectangle = None
-        self.ranged_attack_list_trigger = [False]
+        self.attack_rect_list = []
+        self.attacking_rectangle = None
+        self.attack_list_trigger = [False]
         self.collision = False
 
         # Animations
-        self.range_action = action  # 0 - Attack #1 - Death #2 - Idle #3 - Attack #4
-        self.range_frame_index = 0
-        self.range_image = range_attack_animation_list[self.range_action][self.range_frame_index]
-        self.range_attack_animation_list = range_attack_animation_list
+        self.action = action  # 0 - Attack #1 - Death #2 - Idle #3 - Attack #4
+        self.frame_index = 0
+        self.image = attack_animation_list[self.action][self.frame_index]
+        self.attack_animation_list = attack_animation_list
 
         # Clock
         self.update_time = pygame.time.get_ticks()
@@ -387,15 +340,14 @@ class Ranged_Attack:
 
     def draw_ranged_attack(self, surface, offset, image_scale):
         pass
+
     def update_ranged_attack(self, surface):
         pass
+
     def attack_collisions(self, target):
         pass
 
 
-""" Importing the modules """
-
-# from Characters_Code import *
 from Characters_Code.Asuka import *
 from Characters_Code.Daichi import *
 from Characters_Code.Gyamon import *
