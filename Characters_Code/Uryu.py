@@ -15,8 +15,23 @@ class Uryu(Fighter):
         self.animation_list = self.load_images(sprite_sheet, animation_steps, "animations")
         self.projectile_list = self.load_images(sprite_sheet, animation_steps, "projectiles")
         self.image = self.animation_list[self.action][self.frame_index]
+        # Attack
+        self.attack_data = {
+            "normal_attack": {"trigger": False, "cooldown":100, "frame_index":4, "damage": 1, "knockback": 1, "action":9, "range_attack":True, "range_attack_action": 7},
+            "normal_attack_up": {"trigger": False, "cooldown":100, "frame_index":3, "damage": 1, "knockback": 1, "action":19, "range_attack":True, "range_attack_action":20 },
+            "normal_attack_down": {"trigger": False, "cooldown":100, "frame_index":4, "damage": 1, "knockback": 1, "action":8, "range_attack":True,"range_attack_action": 11},
+            "normal_jump_attack": {"trigger": False, "cooldown":100, "frame_index":3, "damage": 1, "knockback": 1, "action":22, "range_attack":True,"range_attack_action": 23},
+            "normal_attack_forward": {"trigger": False, "cooldown": 100, "frame_index":3, "damage": 1, "knockback": 1, "action":14, "range_attack":True,"range_attack_action":7},
+            "strong_attack": {"trigger": False, "cooldown":100, "frame_index":4, "damage": 1, "knockback": 1, "action":10, "range_attack":True,"range_attack_action": 7},
+            "strong_attack_up": {"trigger": False, "cooldown":100, "frame_index":3, "damage": 1, "knockback": 1, "action":12, "range_attack":True,"range_attack_action":3},
+            "strong_attack_down": {"trigger": False, "cooldown":100, "frame_index":2<=self.frame_index<=6, "damage": 1, "knockback": 1, "action":5, "range_attack":True,"range_attack_action":25},
+            "strong_jump_attack": {"trigger": False, "cooldown":100, "frame_index":4, "damage": 1, "knockback": 1, "action":18, "range_attack":True,"range_attack_action":6},
+            "special_attack": {"trigger": False, "cooldown":100, "frame_index":9, "damage": 1, "knockback": 1, "action":2, "range_attack":True,"range_attack_action": 1},
+            "special_attack_up": {"trigger": False, "cooldown":100, "frame_index":3, "damage": 1, "knockback": 1, "action":4, "range_attack":True,"range_attack_action": 11},
+            "special_attack_down": {"trigger": False, "cooldown":100, "frame_index":0, "damage": 1, "knockback": 1, "action":21, "range_attack":True,"range_attack_action": 0}
+        }
 
-    # Extract images from Sprite Sheets
+    # Image Methods
     def load_images(self, sprite_sheet, animation_steps, choice):
         animation_list = []
         projectile_list = []
@@ -65,150 +80,43 @@ class Uryu(Fighter):
 
         pygame.draw.rect(surface, (255, 0, 0), self.rect, 4)
 
-    def time_passed(self):
-        return pygame.time.get_ticks() - self.update_time
+    # Attack Methods
 
-    def attack(self, surface, target):
-        pass
-        # # In case there's an error
-        # if self.attacking and 0 == 1:
-        #     self.attacking_rectangle = pygame.Rect(self.rect.centerx - (1.7 * self.rect.width * self.flip),
-        #                                       self.rect.y * 1.125, 1.75 * self.rect.width, 0.75 * self.rect.height)
-        #
-        # #pygame.draw.rect(surface, (0, 255, 0), self.attacking_rectangle, 1)
-        #
-        #
-        # # Rectangle collisions
-        # if self.attacking_rectangle.colliderect(target.rect):
-        #     target.hit = True
-        #     target.frame_index = 0
-        #
-        #     # Taking Damage
-        #     # Normal Attack Attacks
-        #     if self.normal_attack:
-        #         target.health -= 1
-        #     elif self.normal_attack_up:
-        #         target.health -= 1
-        #     elif self.normal_attack_down:
-        #         target.health -= 2
-        #     elif self.normal_jump_attack:
-        #         target.health -= 2
-        #
-        #     # Strong Attack Attacks
-        #     elif self.strong_attack:
-        #         target.health -= 2
-        #     elif self.strong_attack_up:
-        #         target.health -= 2
-        #     elif self.strong_attack_down:
-        #         target.health -= 2
-        #
-        #     # Special Attack Attacks
-        #     elif self.special_attack:
-        #         target.health -= 4
-        #     elif self.special_attack_up:
-        #         target.health -= 4
-        #     elif self.special_attack_down:
-        #         target.health -= 4
-        #
-        #     # Knock-back - Once
-        #     if target.flip:
-        #         target.rect.x += 25
-        #         self.rect.x += 10
-        #     else:
-        #         target.rect.x -= 25
-        #         self.rect.x -= 10
+    # Attack Methods
+    def update_attack_data(self):
+        # Continuous declaration to update the values like Rect Position and Trigger Values
+        self.attack_data = {
+            "normal_attack": {"trigger": False, "cooldown": 100, "frame_index": 4, "damage": 1, "knockback": 1,
+                              "action": 9, "range_attack": True, "range_attack_action": 7},
+            "normal_attack_up": {"trigger": False, "cooldown": 100, "frame_index": 3, "damage": 1, "knockback": 1,
+                                 "action": 19, "range_attack": True, "range_attack_action": 20},
+            "normal_attack_down": {"trigger": False, "cooldown": 100, "frame_index": 4, "damage": 1, "knockback": 1,
+                                   "action": 8, "range_attack": True, "range_attack_action": 11},
+            "normal_jump_attack": {"trigger": False, "cooldown": 100, "frame_index": 3, "damage": 1, "knockback": 1,
+                                   "action": 22, "range_attack": True, "range_attack_action": 23},
+            "normal_attack_forward": {"trigger": False, "cooldown": 100, "frame_index": 3, "damage": 1, "knockback": 1,
+                                      "action": 14, "range_attack": True, "range_attack_action": 7},
+            "strong_attack": {"trigger": False, "cooldown": 100, "frame_index": 4, "damage": 1, "knockback": 1,
+                              "action": 10, "range_attack": True, "range_attack_action": 7},
+            "strong_attack_up": {"trigger": False, "cooldown": 100, "frame_index": 3, "damage": 1, "knockback": 1,
+                                 "action": 12, "range_attack": True, "range_attack_action": 3},
+            "strong_attack_down": {"trigger": False, "cooldown": 100, "frame_index": 2 <= self.frame_index <= 6,
+                                   "damage": 1, "knockback": 1, "action": 5, "range_attack": True,
+                                   "range_attack_action": 25},
+            "strong_jump_attack": {"trigger": False, "cooldown": 100, "frame_index": 4, "damage": 1, "knockback": 1,
+                                   "action": 18, "range_attack": True, "range_attack_action": 6},
+            "special_attack": {"trigger": False, "cooldown": 100, "frame_index": 9, "damage": 1, "knockback": 1,
+                               "action": 2, "range_attack": True, "range_attack_action": 1},
+            "special_attack_up": {"trigger": False, "cooldown": 100, "frame_index": 3, "damage": 1, "knockback": 1,
+                                  "action": 4, "range_attack": True, "range_attack_action": 11},
+            "special_attack_down": {"trigger": False, "cooldown": 100, "frame_index": 0, "damage": 1, "knockback": 1,
+                                    "action": 21, "range_attack": True, "range_attack_action": 0}
+        }
+        for key, value in self.attack_triggers.items():
+            if key in self.attack_data.keys():
+                self.attack_data[key]["trigger"] = value["trigger"]
 
-    def _update_animation(self, target):
-        animation_cooldown = 90
-        # Update the animations + adds animation cooldown (different values for different animations)
-        if self.knockback:
-            if (pygame.time.get_ticks() - self.update_time) > 200:
-                self.frame_index += 1
-                self.update_time = pygame.time.get_ticks()
-
-                if self.frame_index >= 6:
-                    self.knockback = False
-                    self.frame_index = 0
-            self.rect.x += -10 + (20 * self.flip)
-        elif self.hit:
-            if (pygame.time.get_ticks() - self.update_time) > 150:
-                self.frame_index += 1
-                self.update_time = pygame.time.get_ticks()
-
-                if self.frame_index > 1:
-                    self.hit = False
-
-                    # If you're attacking but ure hit earlier
-                    self.attacking = False
-                    #
-                    self.normal_attack = False
-                    self.normal_attack_up = False
-                    self.normal_attack_down = False
-                    self.normal_combo_count = 0
-                    self.normal_jump_attack = False
-                    #
-                    self.strong_attack = False
-                    self.strong_attack_up = False
-                    self.strong_attack_down = False
-                    self.strong_jump_attack = False
-                    #
-                    self.special_attack = False
-                    self.special_attack_down = False
-                    self.special_attack_up = False
-
-        # Normal Attack Attacks
-        elif self.normal_attack:
-            if (pygame.time.get_ticks() - self.update_time) > 200 : # 80:
-                self.frame_index += 1
-                self.update_time = pygame.time.get_ticks()
-        elif self.normal_attack_up:
-            if (pygame.time.get_ticks() - self.update_time) > 200 :# 75:
-                self.frame_index += 1
-                self.update_time = pygame.time.get_ticks()
-        elif self.normal_attack_down:
-            if (pygame.time.get_ticks() - self.update_time) > 200 :# 55:
-                self.frame_index += 1
-                self.update_time = pygame.time.get_ticks()
-        elif self.normal_jump_attack:
-            if (pygame.time.get_ticks() - self.update_time) > 200 :## 85:
-                self.frame_index += 1
-                self.update_time = pygame.time.get_ticks()
-        # Strong Attack Attacks
-        elif self.strong_attack:
-            if (pygame.time.get_ticks() - self.update_time) > 200 :# 90:
-                self.frame_index += 1
-                self.update_time = pygame.time.get_ticks()
-        elif self.strong_attack_up:
-            if (pygame.time.get_ticks() - self.update_time) > 200 :# 100:
-                self.frame_index += 1
-                self.update_time = pygame.time.get_ticks()
-        elif self.strong_attack_down:
-            if (pygame.time.get_ticks() - self.update_time) > 200 :# 90:
-                self.frame_index += 1
-                self.update_time = pygame.time.get_ticks()
-        elif self.strong_jump_attack:
-            if (pygame.time.get_ticks() - self.update_time) > 200 :# 70:
-                self.frame_index += 1
-                self.update_time = pygame.time.get_ticks()
-        # Special Attack Attacks
-        elif self.special_attack:
-            if (pygame.time.get_ticks() - self.update_time) > 200 :#110:
-                self.frame_index += 1
-                self.update_time = pygame.time.get_ticks()
-        elif self.special_attack_up:
-            if (pygame.time.get_ticks() - self.update_time) > 300 :#110:
-                self.frame_index += 1
-                self.update_time = pygame.time.get_ticks()
-        elif self.special_attack_down:
-            if (pygame.time.get_ticks() - self.update_time) > 300 :#110:
-                self.frame_index += 1
-                self.update_time = pygame.time.get_ticks()
-        else:
-            if (pygame.time.get_ticks() - self.update_time) > animation_cooldown:
-                self.frame_index += 1
-                self.update_time = pygame.time.get_ticks()
-
-    def _attack_checks(self, surface, target):
+    def attacks_management(self, surface, target):
         if self.range_attack:
             for instance in self.ranged_attack_instance_list:
                 instance.main(surface, self.offset, self.image_scale, target)
@@ -229,100 +137,25 @@ class Uryu(Fighter):
             self.ranged_attack_instance_list[len(self.ranged_attack_instance_list) - 1] = \
                 self.Ranged_Uryu(self.flip, self.projectile_list, action, self.rect, "Uryu")
 
-        # Checks For Attacks
-        if self.attacking:
-            # Continuous Knockback and effects
-            # if target.hit and not target.dead:
-            #     if self.special_attack:
-            #         target.rect.x += 2 + (-4 * self.flip)
-
+        def attack_triggers():
             # The attacking rectangle will only activate at certain frame_indexes (with some having varying DPS):
             if self.frame_index < len(self.animation_list[self.action]):
-                # Normal Attack Attacks
-                if self.normal_attack:
-                    if self.attack_list_trigger[self.frame_index] == False and self.frame_index == 4:
-                        self.attack_list_trigger[self.frame_index] = True
-                        # Action = 7
-                        init_ranged_attack(7)
+                for attack in self.attack_data.values():
+                    if attack["trigger"]:
+                        if not self.attack_list_trigger[self.frame_index] and self.frame_index == attack["frame_index"]:
+                            init_ranged_attack(attack["range_attack_action"])
+                            self.attack_list_trigger[self.frame_index] = True
 
-                elif self.normal_attack_forward:
-                    if self.attack_list_trigger[self.frame_index] == False and self.frame_index == 3:
-                        self.attack_list_trigger[self.frame_index] = True
-                        # Action = 7
-                        init_ranged_attack(7)
+        # Checks For Attacks
+        if self.attacking:
 
-                elif self.normal_attack_up:
-                    if self.attack_list_trigger[self.frame_index] == False and self.frame_index == 3:
-                        self.attack_list_trigger[self.frame_index] = True
-                        # Action = 20
-                        init_ranged_attack(20)
+            # Initialize the attacks
+            attack_triggers()
 
-                elif self.normal_attack_down:
-                    if self.attack_list_trigger[self.frame_index] == False and self.frame_index == 4:
-                        self.attack_list_trigger[self.frame_index] = True
-                        # Action = 11
-                        init_ranged_attack(11)
-
-                elif self.normal_jump_attack:
-                    if self.attack_list_trigger[self.frame_index] == False and self.frame_index == 3:
-                        self.attack_list_trigger[self.frame_index] = True
-                        # Action = 23
-                        init_ranged_attack(23)
-
-                # Strong Attacks
-                elif self.strong_attack:
-                    if self.attack_list_trigger[self.frame_index] == False and self.frame_index == 4:
-                        self.attack_list_trigger[self.frame_index] = True
-                        # Action = 7
-                        init_ranged_attack(7)
-
-                elif self.strong_attack_up:
-                    if self.attack_list_trigger[self.frame_index] == False and self.frame_index == 3:
-                        self.attack_list_trigger[self.frame_index] = True
-                        # Action = 3
-                        init_ranged_attack(3)
-
-                elif self.strong_attack_down:
-                    if self.attack_list_trigger[self.frame_index] == False and 2 <= self.frame_index <= 6:
-                        self.attack_list_trigger[self.frame_index] = True
-                        if self.frame_index == 2:
-                            # Action = 25
-                            init_ranged_attack(25)
-
-                elif self.strong_jump_attack:
-                    if self.attack_list_trigger[self.frame_index] == False and self.frame_index == 4:
-                        self.attack_list_trigger[self.frame_index] = True
-                        # Action = 6
-                        init_ranged_attack(6)
-
-                # Special Attacks
-                elif self.special_attack:
-                    if self.attack_list_trigger[self.frame_index] == False and self.frame_index == 9:
-                        self.attack_list_trigger[self.frame_index] = True
-                        # Action = 1
-                        init_ranged_attack(1)
-
-                elif self.special_attack_up:
-                    if self.attack_list_trigger[self.frame_index] == False and self.frame_index == 3:
-                        self.attack_list_trigger[self.frame_index] = True
-                        # Action = 25
-                        init_ranged_attack(11)
-
-                elif self.special_attack_down:
-                    if self.attack_list_trigger[self.frame_index] == False and self.frame_index == 0:
-                        self.attack_list_trigger[self.frame_index] = True
-                        # Action = 0
-                        init_ranged_attack(0)
-
-
-        # For hit-box purposes
-        if self.attacking_rectangle != None:
-            pygame.draw.rect(surface, (0, 255, 0), self.attacking_rectangle, 2)
-
-    # Update the timer and sprite animations
+    # Update the sprites and stats
     def update(self, target, surface):
-        # Check what animation the player is performing
-        # print("Character --> " + " Action:", self.action, "\n Frame Index:", self.frame_index, "\n\n")
+        # Keeps proper track of attack triggers.
+        self.update_attack_data()
 
         if self.health <= 0:
             self.health = 0
@@ -333,38 +166,9 @@ class Uryu(Fighter):
         elif self.hit:
             self.update_action(27)
         elif self.attacking:
-            # Normal Attack Attacks
-            if self.normal_attack:
-                self.update_action(9)
-            elif self.normal_attack_forward:
-                self.update_action(14)
-            elif self.normal_attack_up:
-                self.update_action(19)
-            elif self.normal_attack_down:
-                self.update_action(8)
-            elif self.normal_jump_attack:
-                self.update_action(22)
-
-                """ MIGHT ADD NORMAL ATTACK FORWARD """
-
-            # Strong Attack Attacks
-            elif self.strong_attack:
-                self.update_action(10)
-            elif self.strong_attack_up:
-                self.update_action(12)
-            elif self.strong_attack_down:
-                self.update_action(5)
-            elif self.strong_jump_attack:
-                self.update_action(18)
-
-            # Special Attack Attacks
-            elif self.special_attack:
-                self.update_action(2)
-            elif self.special_attack_up:
-                self.update_action(4)
-            elif self.special_attack_down:
-                self.update_action(21)
-
+            for attack in self.attack_data.values():
+                if attack["trigger"]:
+                    self.update_action(attack["action"])
         elif self.dash:
             self.update_action(26)
         elif (self.jump[0] == True) or (self.jump[1] == True):
@@ -374,21 +178,16 @@ class Uryu(Fighter):
         elif self.block:
             self.update_action(28)
         else:
-            self.update_action(24)  # IDLE
-        #28  max
-        animation_cooldown = 85
+            self.update_action(24)
 
         # Update Image ------------------------------------------
         self.image = self.animation_list[self.action][self.frame_index]
 
-
-        # Update the animation frame index at certain milliseconds
-        self._update_animation(target)
+        self.update_animation(target)
 
         # Checks for attacks like when it happens, etc.
-        self._attack_checks(surface, target)
+        self.attacks_management(surface, target)
 
-        # If the end of the animation is reached
         self.end_of_animation()
 
     def end_of_animation(self):
@@ -410,21 +209,10 @@ class Uryu(Fighter):
                     self.attack_list_trigger = [False]
 
                     self.attacking = False
-                    #
-                    self.normal_attack = False
-                    self.normal_attack_forward = False
-                    self.normal_attack_up = False
-                    self.normal_attack_down = False
-                    self.normal_jump_attack = False
-                    #
-                    self.strong_attack = False
-                    self.strong_attack_up = False
-                    self.strong_attack_down = False
-                    self.strong_jump_attack = False
-                    #
-                    self.special_attack = False
-                    self.special_attack_up = False
-                    self.special_attack_down = False
+                    for attack in self.attack_data.values():
+                        attack["trigger"] = False
+                    for attack in self.attack_triggers.values():
+                        attack["trigger"] = False
 
                 # If dash is finished
                 if self.dash:
@@ -441,6 +229,49 @@ class Uryu(Fighter):
             self.frame_index = 0
             self.update_time = pygame.time.get_ticks()
 
+    def update_animation(self, target):
+        animation_cooldown = 90
+        # Update the animations + adds animation cooldown (different values for different animations)
+        if self.knockback:
+            if (pygame.time.get_ticks() - self.update_time) > 200:
+                self.frame_index += 1
+                self.update_time = pygame.time.get_ticks()
+
+                if self.frame_index >= 6:
+                    self.knockback = False
+                    self.frame_index = 0
+            self.rect.x += -10 + (20 * self.flip)
+        elif self.hit:
+            if (pygame.time.get_ticks() - self.update_time) > 150:
+                self.frame_index += 1
+                self.update_time = pygame.time.get_ticks()
+
+                if self.frame_index > 1:
+                    self.hit = False
+
+                    # If you're attacking but ure hit earlier
+                    self.attacking = False
+
+                    for attack in self.attack_data.values():
+                        attack["trigger"] = False
+
+                    self.normal_combo_count = 0
+
+        elif self.attacking:
+            for attack in self.attack_data.values():
+                if attack["trigger"]:
+                    if self.time_passed() > attack["cooldown"]:
+                        self.frame_index += 1
+                        self.update_time = pygame.time.get_ticks()
+
+        else:
+            if (pygame.time.get_ticks() - self.update_time) > animation_cooldown:
+                self.frame_index += 1
+                self.update_time = pygame.time.get_ticks()
+
+    # Time
+    def time_passed(self):
+        return pygame.time.get_ticks() - self.update_time
 
     class Ranged_Uryu(Ranged_Attack):
         def __init__(self, flip, attack_animation_list, action, character_rect, character):
