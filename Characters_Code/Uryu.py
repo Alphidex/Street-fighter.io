@@ -510,7 +510,7 @@ class Uryu(Fighter):
 
         def draw_ranged_attack(self, surface, offset, image_scale):
             # Drawing Ranged Attacks
-            img = pygame.transform.flip(self.range_image, self.flip, False)
+            img = pygame.transform.flip(self.image, self.flip, False)
 
             # Special Down
             if self.action == 0:
@@ -582,7 +582,7 @@ class Uryu(Fighter):
             animation_cooldown = 140
 
             # Refresh the image
-            self.range_image = self.attack_animation_list[self.action][self.frame_index]
+            self.image = self.attack_animation_list[self.action][self.frame_index]
 
             # Special Attack Mess-up
             if self.action == 1:

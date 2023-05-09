@@ -1,6 +1,16 @@
 import pygame
 from GUI import *
 from characters import *
+from Characters_Code.Asuka import *
+from Characters_Code.Daichi import *
+from Characters_Code.Gyamon import *
+from Characters_Code.Heihachi import *
+from Characters_Code.Ichigo import *
+from Characters_Code.Renji import *
+from Characters_Code.Sanji import *
+from Characters_Code.Toshiro import *
+from Characters_Code.Uryu import *
+from Characters_Code.Zoro import *
 """
 1. Draw a Start box
 2. Overhaul the colors

@@ -15,6 +15,20 @@ class Heihachi(Fighter):
         self.animation_list = self.load_images(sprite_sheet, animation_steps, "animations")
         self.projectile_list = self.load_images(sprite_sheet, animation_steps, "projectiles")
         self.image = self.animation_list[self.action][self.frame_index]
+        # Attacks
+        self.attack_data = {
+            "normal_attack": {"trigger": False, "cooldown": 80, "frame_index": 1, "damage": 1, "knockback": 1, "action": 14, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - (1.35 * self.rect.width * self.flip),self.rect.y * 1.09, 1.35 * self.rect.width, 0.35 * self.rect.height)},
+            "normal_attack_up": {"trigger": False, "cooldown": 75, "frame_index": 2, "damage": 1, "knockback": 1, "action": 13, "range_attack":False, "rect": pygame.Rect(self.rect.centerx + 25 - (120 * self.flip),self.rect.y - 100, 70, 1.35 * self.rect.height)},
+            "normal_attack_down": {"trigger": False, "cooldown": 55, "frame_index": 1, "damage": 1, "knockback": 1, "action": 6, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - 130,self.rect.y + 80, 260, 60)},
+            "normal_jump_attack": {"trigger": False, "cooldown": 85, "frame_index": 3, "damage": 1, "knockback": 1, "action": 8, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - 20 - (120 * self.flip),self.rect.y - 20, 160, self.rect.height + 40)},
+            "strong_attack": {"trigger": False, "cooldown": 90, "frame_index":2<=self.frame_index<=11, "damage": 1, "knockback": 1, "action": 10, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - (150 * self.flip),self.rect.y + 10, 150, 0.75 * self.rect.height)},
+            "strong_attack_up": {"trigger": False, "cooldown": 100, "frame_index": 6, "damage": 1, "knockback": 1, "action":2, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - (90 * self.flip),self.rect.y - 33, 90, 0.9 * self.rect.height)},
+            "strong_attack_down": {"trigger": False, "cooldown": 90, "frame_index": 4, "damage": 1, "knockback": 1, "action":4, "range_attack":True, "rect": pygame.Rect(self.rect.centerx - 30 - (30 * self.flip),self.rect.y - 20, 90, self.rect.height + 40)},
+            "strong_jump_attack": {"trigger": False, "cooldown": 70, "frame_index":3<=self.frame_index<=5, "damage": 1, "knockback": 1, "action":7, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - 30 - (60 * self.flip),self.rect.y, 120, self.rect.height)},
+            "special_attack": {"trigger": False, "cooldown": 110, "frame_index": 9, "damage": 1, "knockback": 1, "action":3, "range_attack":True, "rect": pygame.Rect(self.rect.centerx - (1.4 * self.rect.width * self.flip),self.rect.y + 24, 1.4 * self.rect.width, 0.56 * self.rect.height)},
+            "special_attack_up": {"trigger": False, "cooldown": 110, "frame_index": 0, "damage": 1, "knockback": 1, "action":1, "range_attack":True, "rect": pygame.Rect(self.rect.centerx - 130,self.rect.y - 150, 260, 150 + self.rect.height)},
+            "special_attack_down": {"trigger": False, "cooldown": 110, "frame_index": 10, "damage": 1, "knockback": 1, "action":0, "range_attack":True, "rect":  pygame.Rect(self.rect.centerx - 150 - (1 * self.flip),self.rect.y - 50, 300, 150 + self.rect.height)}
+        }
 
     # Extract images from Sprite Sheets
     def load_images(self, sprite_sheet, animation_steps, choice):
@@ -94,50 +108,6 @@ class Heihachi(Fighter):
 
     def attack(self, surface, target):
         # HIT-BOXES
-
-        # Normal Attack Attacks
-        if self.normal_attack:
-            self.attacking_rectangle = pygame.Rect(self.rect.centerx - (1.35 * self.rect.width * self.flip),
-                                              self.rect.y * 1.09, 1.35 * self.rect.width, 0.35 * self.rect.height)
-        elif self.normal_attack_up:
-            self.attacking_rectangle = pygame.Rect(self.rect.centerx + 25 - (120 * self.flip),
-                                              self.rect.y - 100, 70, 1.35 * self.rect.height)
-        elif self.normal_attack_down:
-            self.attacking_rectangle = pygame.Rect(self.rect.centerx - 130,
-                                              self.rect.y + 80, 260, 60)
-        elif self.normal_jump_attack:
-            self.attacking_rectangle = pygame.Rect(self.rect.centerx - 20 - (120 * self.flip),
-                                                   self.rect.y - 20, 160, self.rect.height + 40)
-        # Strong Attack Attacks
-        elif self.strong_attack:
-            self.attacking_rectangle = pygame.Rect(self.rect.centerx - (150 * self.flip),
-                                              self.rect.y + 10, 150, 0.75 * self.rect.height)
-        elif self.strong_attack_up:
-            self.attacking_rectangle = pygame.Rect(self.rect.centerx - (90 * self.flip),
-                                              self.rect.y - 33, 90, 0.9 * self.rect.height)
-        elif self.strong_attack_down:
-            self.attacking_rectangle = pygame.Rect(self.rect.centerx - 30 - (30 * self.flip),
-                                              self.rect.y - 20, 90, self.rect.height + 40)
-        elif self.strong_jump_attack:
-            self.attacking_rectangle = pygame.Rect(self.rect.centerx - 30 - (60 * self.flip),
-                                                   self.rect.y, 120, self.rect.height)
-        # Special Attack Attacks
-        elif self.special_attack:
-            self.attacking_rectangle = pygame.Rect(self.rect.centerx - (1.4 * self.rect.width * self.flip),
-                                              self.rect.y + 24, 1.4 * self.rect.width, 0.56 * self.rect.height)
-        elif self.special_attack_up:
-            self.attacking_rectangle = pygame.Rect(self.rect.centerx - 130,
-                                                   self.rect.y - 150, 260, 150 + self.rect.height)
-        elif self.special_attack_down:
-            self.attacking_rectangle = pygame.Rect(self.rect.centerx - 150 - (1 * self.flip),
-                                                   self.rect.y - 50, 300, 150 + self.rect.height)
-        # In case there's an error
-        else:
-            self.attacking_rectangle = pygame.Rect(self.rect.centerx - (1.7 * self.rect.width * self.flip),
-                                              self.rect.y * 1.125, 1.75 * self.rect.width, 0.75 * self.rect.height)
-
-        pygame.draw.rect(surface, (0, 255, 0), self.attacking_rectangle, 1)
-
 
         # Rectangle collisions
         if self.attacking_rectangle.colliderect(target.rect):
@@ -522,7 +492,7 @@ class Heihachi(Fighter):
 
         def draw_ranged_attack(self, surface, offset, image_scale):
             # Drawing Ranged Attacks
-            img = pygame.transform.flip(self.range_image, self.flip, False)
+            img = pygame.transform.flip(self.image, self.flip, False)
 
             if self.character == "Heihachi":
                 if self.action == 0:
@@ -540,7 +510,7 @@ class Heihachi(Fighter):
         def update_ranged_attack(self, surface):
             animation_cooldown = 160
             # Refresh the image
-            self.range_image = self.attack_animation_list[self.action][self.frame_index]
+            self.image = self.attack_animation_list[self.action][self.frame_index]
 
             if self.character == "Heihachi":
                 # Increments the frame index

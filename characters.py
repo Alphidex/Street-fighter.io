@@ -1,7 +1,5 @@
 import pygame
-import pygame.sprite
-
-from debug import debug
+from debug import debug, Select_Rect
 
 """ 
 To Fix:
@@ -20,7 +18,6 @@ Combo logic:
 5. Where to place the code?
 """
 
-
 # Fighter has to be generalised
 class Fighter(pygame.sprite.Sprite):
     def __init__(self, player, x, y, flip, data, sprite_sheet, animation_steps, character_name):
@@ -38,6 +35,7 @@ class Fighter(pygame.sprite.Sprite):
             "player_2": {"right": pygame.K_RIGHT, "left": pygame.K_LEFT, "up": pygame.K_UP, "down": pygame.K_DOWN,
                          "normal_attack": pygame.K_f, "jump": pygame.K_g, "dash": pygame.K_h, "block": pygame.K_DOWN,
                          "strong_attack": pygame.K_r, "special_attack": pygame.K_t, "assist": pygame.K_y}}
+
         # Fighter Status
         self.hit = False
         self.knockback = False
@@ -76,37 +74,48 @@ class Fighter(pygame.sprite.Sprite):
         # Ranged Attacks
         self.ranged_attack_instance_list = []
         self.range_attack = False
-        # Normal Attacks
-        self.normal_attack = False
-        self.normal_attack_forward = False
-        self.normal_attack_up = False
-        self.normal_attack_down = False
-        self.normal_jump_attack = False
         # Normal Attack Combo
         self.normal_combo_timer = pygame.time.get_ticks()
         self.normal_combo_count = 0
-        # Strong Attacks
-        self.strong_attack = False
-        self.strong_attack_up = False
-        self.strong_attack_down = False
-        self.strong_jump_attack = False
-        # Special Attacks
-        self.special_attack = False
-        self.special_attack_up = False
-        self.special_attack_down = False
-        # Cooldown
-        self.attack_cooldown = 0
+        self.attack_triggers = {
+            "normal_attack": {"trigger": False},
+            "normal_attack_up": {"trigger": False},
+            "normal_attack_down": {"trigger": False},
+            "normal_jump_attack": {"trigger": False},
+            "strong_attack": {"trigger": False},
+            "strong_attack_up": {"trigger": False},
+            "strong_attack_down": {"trigger": False},
+            "strong_jump_attack": {"trigger": False},
+            "special_attack": {"trigger": False},
+            "special_attack_up": {"trigger": False},
+            "special_attack_down": {"trigger": False}
+        }
 
         # Clock
         self.update_time = pygame.time.get_ticks()
+
+        # Debugging
+        self.game_paused = False
+        self.paused_time = 0
+        self.debug_rect = Select_Rect(pygame.display.get_surface())
 
     def set_opponent(self, opponent):
         self.opponent = opponent
 
     def run(self, target):
         self.draw(self.screen)
-        self.move(target)
-        self.update(target, self.screen)
+        keys = pygame.key.get_pressed()
+
+        if pygame.time.get_ticks() - self.paused_time > 300:
+            if keys[pygame.K_p]:
+                self.paused_time = pygame.time.get_ticks()
+                self.game_paused = not self.game_paused
+
+        if self.game_paused:
+            self.debug_rect.select_rect()
+        else:
+            self.move(target)
+            self.update(target, self.screen)
 
     def draw(self, screen):
         pass
@@ -192,49 +201,33 @@ class Fighter(pygame.sprite.Sprite):
                             # Normal Attack Attacks
                             if key[self.control_keys[player]["normal_attack"]]:
                                 if chr_in_air:
-                                    self.normal_jump_attack = True
+                                    self.attack_triggers["normal_jump_attack"]["trigger"] = True
                                 elif key[self.control_keys[player]["down"]]:
-                                    self.normal_attack_down = True
+                                    self.attack_triggers["normal_attack_down"]["trigger"] = True
                                 elif key[self.control_keys[player]["up"]]:
-                                    self.normal_attack_up = True
+                                    self.attack_triggers["normal_attack_up"]["trigger"] = True
                                 else:
-                                    # Combo attacks
-                                    # Update module (preparation)
-                                    if pygame.time.get_ticks() - self.normal_combo_timer >= 1200 or \
-                                            self.normal_combo_count >= 3:
-                                        self.normal_combo_count = 0
-                                        self.normal_combo_timer = pygame.time.get_ticks()
-
-                                    # Logic
-                                    if self.normal_combo_count == 0:
-                                        self.normal_attack = True
-                                    if pygame.time.get_ticks() - self.normal_combo_timer < 1200:
-                                        if self.normal_combo_count == 1:
-                                            self.normal_attack_down = True
-                                        elif self.normal_combo_count == 2:
-                                            self.normal_attack_up = True
-                                    self.normal_combo_count += 1
-                                    self.normal_combo_timer = pygame.time.get_ticks()
+                                    self.combo_attack_logic()
 
                             # Strong Attack Attacks
                             if key[self.control_keys[player]["strong_attack"]]:
                                 if chr_in_air:
-                                    self.strong_jump_attack = True
+                                    self.attack_triggers["strong_jump_attack"]["trigger"] = True
                                 elif key[self.control_keys[player]["down"]]:
-                                    self.strong_attack_down = True
+                                    self.attack_triggers["strong_attack_down"]["trigger"] = True
                                 elif key[self.control_keys[player]["up"]]:
-                                    self.strong_attack_up = True
+                                    self.attack_triggers["strong_attack_up"]["trigger"] = True
                                 else:
-                                    self.strong_attack = True
+                                    self.attack_triggers["strong_attack"]["trigger"] = True
 
                             # Special Attack Attacks
                             if key[self.control_keys[player]["special_attack"]]:
                                 if key[self.control_keys[player]["down"]]:
-                                    self.special_attack_down = True
+                                    self.attack_triggers["special_attack_down"]["trigger"] = True
                                 elif key[self.control_keys[player]["up"]]:
-                                    self.special_attack_up = True
+                                    self.attack_triggers["special_attack_up"]["trigger"] = True
                                 else:
-                                    self.special_attack = True
+                                    self.attack_triggers["special_attack"]["trigger"] = True
 
                             # Update the attack_list_trigger
                             self.attack_list_trigger *= 50
@@ -281,6 +274,25 @@ class Fighter(pygame.sprite.Sprite):
             if self.dash:
                 self.rect.x += 30 + (-60 * self.flip)
 
+    def combo_attack_logic(self):
+        # Combo attacks
+        # Update module (preparation)
+        if pygame.time.get_ticks() - self.normal_combo_timer >= 1200 or \
+                self.normal_combo_count >= 3:
+            self.normal_combo_count = 0
+            self.normal_combo_timer = pygame.time.get_ticks()
+
+        # Logic
+        if self.normal_combo_count == 0:
+            self.attack_triggers["normal_attack"]["trigger"] = True
+        if pygame.time.get_ticks() - self.normal_combo_timer < 1200:
+            if self.normal_combo_count == 1:
+                self.attack_triggers["normal_attack_down"]["trigger"] = True
+            elif self.normal_combo_count == 2:
+                self.attack_triggers["normal_attack_up"]["trigger"] = True
+        self.normal_combo_count += 1
+        self.normal_combo_timer = pygame.time.get_ticks()
+
     def move(self, target):
         # Variables
         SPEED = 7
@@ -298,7 +310,7 @@ class Fighter(pygame.sprite.Sprite):
         dy += self.vel_y
 
         # Attacking in air, holds you in air
-        if self.normal_jump_attack or self.strong_jump_attack:
+        if self.attack_triggers["normal_jump_attack"]["trigger"] or self.attack_triggers["strong_jump_attack"]["trigger"]:
             dy = 0
             self.vel_y = 0
 
@@ -310,6 +322,7 @@ class Fighter(pygame.sprite.Sprite):
         # UPDATE POSITION OF RECTANGLE
         self.rect.x += dx
         self.rect.y += dy
+
 
 class Ranged_Attack:
     def __init__(self, flip, attack_animation_list, action, character_rect, character):
@@ -346,15 +359,3 @@ class Ranged_Attack:
 
     def attack_collisions(self, target):
         pass
-
-
-from Characters_Code.Asuka import *
-from Characters_Code.Daichi import *
-from Characters_Code.Gyamon import *
-from Characters_Code.Heihachi import *
-from Characters_Code.Ichigo import *
-from Characters_Code.Renji import *
-from Characters_Code.Sanji import *
-from Characters_Code.Toshiro import *
-from Characters_Code.Uryu import *
-from Characters_Code.Zoro import *

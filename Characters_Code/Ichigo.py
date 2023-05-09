@@ -508,7 +508,7 @@ class Ichigo(Fighter):
 
         def draw_ranged_attack(self, surface, offset, image_scale):
             # Drawing Ranged Attacks
-            img = pygame.transform.flip(self.range_image, self.flip, False)
+            img = pygame.transform.flip(self.image, self.flip, False)
 
             if self.character == "Ichigo":
                 if self.action == 3:
@@ -536,7 +536,7 @@ class Ichigo(Fighter):
         def update_ranged_attack(self, surface):
             animation_cooldown = 160
             # Refresh the image
-            self.range_image = self.attack_animation_list[self.action][self.frame_index]
+            self.image = self.attack_animation_list[self.action][self.frame_index]
 
             if self.character == "Ichigo":
                 # Increments the frame index

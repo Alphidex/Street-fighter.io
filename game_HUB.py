@@ -1,8 +1,8 @@
 import pygame
 from character_data import *
-from characters import *
+from characters import Fighter
 from GUI import *
-from character_selection import Select_Characters
+from character_selection import *
 from debug import debug
 
 class Game:

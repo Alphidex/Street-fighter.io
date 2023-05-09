@@ -508,7 +508,7 @@ class Toshiro(Fighter):
 
         def draw_ranged_attack(self, surface, offset, image_scale):
             # Drawing Ranged Attacks
-            img = pygame.transform.flip(self.range_image, self.flip, False)
+            img = pygame.transform.flip(self.image, self.flip, False)
 
             # Strong Attack Up
             if self.action == 24:
@@ -556,7 +556,7 @@ class Toshiro(Fighter):
         def update_ranged_attack(self, surface):
             animation_cooldown = 160
             # Refresh the image
-            self.range_image = self.attack_animation_list[self.action][self.frame_index]
+            self.image = self.attack_animation_list[self.action][self.frame_index]
 
             # Increments the frame index
             if (pygame.time.get_ticks() - self.update_time) > animation_cooldown:
