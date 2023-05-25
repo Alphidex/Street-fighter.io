@@ -16,19 +16,8 @@ class Heihachi(Fighter):
         self.projectile_list = self.load_images(sprite_sheet, animation_steps, "projectiles")
         self.image = self.animation_list[self.action][self.frame_index]
         # Attacks
-        self.attack_data = {
-            "normal_attack": {"trigger": False, "cooldown": 80, "frame_index": 1, "damage": 1, "knockback": 1, "action": 14, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - (1.35 * self.rect.width * self.flip),self.rect.y * 1.09, 1.35 * self.rect.width, 0.35 * self.rect.height)},
-            "normal_attack_up": {"trigger": False, "cooldown": 75, "frame_index": 2, "damage": 1, "knockback": 1, "action": 13, "range_attack":False, "rect": pygame.Rect(self.rect.centerx + 25 - (120 * self.flip),self.rect.y - 100, 70, 1.35 * self.rect.height)},
-            "normal_attack_down": {"trigger": False, "cooldown": 55, "frame_index": 1, "damage": 1, "knockback": 1, "action": 6, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - 130,self.rect.y + 80, 260, 60)},
-            "normal_jump_attack": {"trigger": False, "cooldown": 85, "frame_index": 3, "damage": 1, "knockback": 1, "action": 8, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - 20 - (120 * self.flip),self.rect.y - 20, 160, self.rect.height + 40)},
-            "strong_attack": {"trigger": False, "cooldown": 90, "frame_index":2<=self.frame_index<=11, "damage": 1, "knockback": 1, "action": 10, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - (150 * self.flip),self.rect.y + 10, 150, 0.75 * self.rect.height)},
-            "strong_attack_up": {"trigger": False, "cooldown": 100, "frame_index": 6, "damage": 1, "knockback": 1, "action":2, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - (90 * self.flip),self.rect.y - 33, 90, 0.9 * self.rect.height)},
-            "strong_attack_down": {"trigger": False, "cooldown": 90, "frame_index": 4, "damage": 1, "knockback": 1, "action":4, "range_attack":True, "rect": pygame.Rect(self.rect.centerx - 30 - (30 * self.flip),self.rect.y - 20, 90, self.rect.height + 40)},
-            "strong_jump_attack": {"trigger": False, "cooldown": 70, "frame_index":3<=self.frame_index<=5, "damage": 1, "knockback": 1, "action":7, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - 30 - (60 * self.flip),self.rect.y, 120, self.rect.height)},
-            "special_attack": {"trigger": False, "cooldown": 110, "frame_index": 9, "damage": 1, "knockback": 1, "action":3, "range_attack":True, "rect": pygame.Rect(self.rect.centerx - (1.4 * self.rect.width * self.flip),self.rect.y + 24, 1.4 * self.rect.width, 0.56 * self.rect.height)},
-            "special_attack_up": {"trigger": False, "cooldown": 110, "frame_index": 0, "damage": 1, "knockback": 1, "action":1, "range_attack":True, "rect": pygame.Rect(self.rect.centerx - 130,self.rect.y - 150, 260, 150 + self.rect.height)},
-            "special_attack_down": {"trigger": False, "cooldown": 110, "frame_index": 10, "damage": 1, "knockback": 1, "action":0, "range_attack":True, "rect":  pygame.Rect(self.rect.centerx - 150 - (1 * self.flip),self.rect.y - 50, 300, 150 + self.rect.height)}
-        }
+        self.attack_data = self.get_attack_data()
+        self.extend_animation = None
 
     # Image methods
     def load_images(self, sprite_sheet, animation_steps, choice):
@@ -85,11 +74,11 @@ class Heihachi(Fighter):
             if not self.flip:
                 surface.blit(img, (
                     self.rect.x - ((self.offset[0]) * self.image_scale),
-                    self.rect.y - ((self.offset[1] + 50) * self.image_scale)))
+                    self.rect.y - ((self.offset[1] + 52) * self.image_scale)))
             else:
                 surface.blit(img, (
                     self.rect.x - ((self.offset[0]) * self.image_scale * 1.25),
-                    self.rect.y - ((self.offset[1] + 50) * self.image_scale)))
+                    self.rect.y - ((self.offset[1] + 52) * self.image_scale)))
 
         else:
             if not self.flip:
@@ -104,9 +93,8 @@ class Heihachi(Fighter):
         pygame.draw.rect(surface, (255, 0, 0), self.rect, 4)
 
     # Attack methods
-    def update_attack_data(self):
-        # Continuous declaration to update the values like Rect Position and Trigger Values
-        self.attack_data = {
+    def get_attack_data(self):
+        data = {
             "normal_attack": {"trigger": False, "cooldown": 80, "frame_index": 1, "damage": 1, "knockback": 1,
                               "action": 14, "range_attack": False,
                               "rect": pygame.Rect(self.rect.centerx - (1.35 * self.rect.width * self.flip),
@@ -120,14 +108,14 @@ class Heihachi(Fighter):
                                    "rect": pygame.Rect(self.rect.centerx - 130, self.rect.y + 80, 260, 60)},
             "normal_jump_attack": {"trigger": False, "cooldown": 85, "frame_index": 3, "damage": 1, "knockback": 1,
                                    "action": 8, "range_attack": False,
-                                   "rect": pygame.Rect(self.rect.centerx - 20 - (120 * self.flip), self.rect.y - 20,
-                                                       160, self.rect.height + 40)},
+                                   "rect": pygame.Rect(self.rect.centerx - 20 - (135 * self.flip), self.rect.y - 20,
+                                                       175, self.rect.height + 40)},
             "strong_attack": {"trigger": False, "cooldown": 90, "frame_index": 2 <= self.frame_index <= 11, "damage": 1,
                               "knockback": 1, "action": 10, "range_attack": False,
                               "rect": pygame.Rect(self.rect.centerx - (150 * self.flip), self.rect.y + 10, 150,
                                                   0.75 * self.rect.height)},
             "strong_attack_up": {"trigger": False, "cooldown": 100, "frame_index": 6, "damage": 1, "knockback": 1,
-                                 "action": 2, "range_attack": False,
+                                 "action": 2, "range_attack": True,
                                  "rect": pygame.Rect(self.rect.centerx - (90 * self.flip), self.rect.y - 33, 90,
                                                      0.9 * self.rect.height)},
             "strong_attack_down": {"trigger": False, "cooldown": 90, "frame_index": 4, "damage": 1, "knockback": 1,
@@ -143,36 +131,45 @@ class Heihachi(Fighter):
                                "rect": pygame.Rect(self.rect.centerx - (1.4 * self.rect.width * self.flip),
                                                    self.rect.y + 24, 1.4 * self.rect.width, 0.56 * self.rect.height)},
             "special_attack_up": {"trigger": False, "cooldown": 110, "frame_index": 0, "damage": 1, "knockback": 1,
-                                  "action": 1, "range_attack": True,
+                                  "action": 1, "range_attack": False,
                                   "rect": pygame.Rect(self.rect.centerx - 130, self.rect.y - 150, 260,
                                                       150 + self.rect.height)},
-            "special_attack_down": {"trigger": False, "cooldown": 110, "frame_index": 10, "damage": 1, "knockback": 1,
+            "special_attack_down": {"trigger": False, "cooldown": 160, "frame_index": 10, "damage": 1, "knockback": 1,
                                     "action": 0, "range_attack": True,
                                     "rect": pygame.Rect(self.rect.centerx - 150 - (1 * self.flip), self.rect.y - 50,
                                                         300, 150 + self.rect.height)}
         }
+        return data
+
+    def update_attack_data(self):
+        # Continuous declaration to update the values like Rect Position and Trigger Values
+        self.attack_data = self.get_attack_data()
         for key, value in self.attack_triggers.items():
             if key in self.attack_data.keys():
                 self.attack_data[key]["trigger"] = value["trigger"]
-
-    def attack_rectangle_collision(self, surface, target):
-        # HIT-BOXES
-        self.update_attack_data()
 
         for attack in self.attack_data.values():
             if attack["trigger"]:
                 self.attacking_rectangle = attack["rect"]
 
+    def attack_rectangle_collision(self, surface, target):
+        # HIT-BOXES
+        self.update_attack_data()
+
         if self.attacking_rectangle is not None:
             # Rectangle collisions
             if self.attacking_rectangle.colliderect(target.rect):
-                target.hit = True
-                target.frame_index = 0
+                if not target.block:
+                    target.hit = True
+                    target.frame_index = 0
 
-                # Taking Damage
-                for attack in self.attack_data.values():
-                    if attack["trigger"]:
-                        target.health -= attack["damage"]
+                    # Taking Damage
+                    for attack in self.attack_data.values():
+                        if attack["trigger"]:
+                            target.health -= attack["damage"]
+
+                else:
+                    target.shield_health -= 20
 
                 # Knock-back - Once
                 if target.flip:
@@ -202,13 +199,60 @@ class Heihachi(Fighter):
                                                     + str(len(self.ranged_attack_instance_list)))
 
             self.ranged_attack_instance_list[len(self.ranged_attack_instance_list) - 1] = \
-                self.Ranged_Heihachi(self.flip, self.projectile_list, action, self.rect, "Heihachi")
+                self.Ranged_Heihachi(self.flip, self.projectile_list, action, self.rect, "Heihachi", self.opponent)
 
         def attack_effects():
             # Continuous knockback and effects
             if target.hit and not target.dead:
                 if self.attack_data["special_attack"]["trigger"]:
                     target.rect.x += 2 + (-4 * self.flip)
+
+            # Normal
+            if self.attack_data["normal_attack"]["trigger"]:
+                if self.frame_index > 1:
+                    self.rect.x += 2 - (4 * self.flip)
+
+            if self.attack_data["normal_attack_up"]["trigger"]:
+                if 1 <= self.frame_index <3:
+                    self.rect.x += 2 - (4 * self.flip)
+
+            if self.attack_data["normal_jump_attack"]["trigger"]:
+                if 1<= self.frame_index <=7:
+                    self.rect.x += 3 - (6 *self.flip)
+                    self.rect.y += 3
+            # Strong
+            if self.attack_data["strong_attack"]["trigger"]:
+                if 2 <= self.frame_index <= 5:
+                    self.rect.x += 2.5 - (5 * self.flip)
+
+            if self.attack_data["strong_attack_up"]["trigger"]:
+                if self.frame_index == 4:
+                    self.rect.x += 2 - (4 *self.flip)
+
+            if self.attack_data["strong_jump_attack"]["trigger"]:
+                if self.frame_index >= 3:
+                    if self.in_air:
+                        self.frame_index = 3
+                        self.rect.x += 8 - (16 * self.flip)
+                        self.rect.y += 9
+
+            # Special
+            if self.attack_data["special_attack_up"]["trigger"]:
+                if self.frame_index == 2:
+                    self.extend_animation = pygame.time.get_ticks()
+                if self.frame_index >= 3:
+                    if pygame.time.get_ticks() - self.extend_animation < 400:
+                        self.frame_index = 3
+
+            if self.attack_data["special_attack_down"]["trigger"]:
+                if 6 < self.frame_index < 9:
+                    self.rect.x += 5 - (10 * self.flip)
+
+                if self.attack_effect_executions == 0:
+                    if self.frame_index == 6:
+                        self.rect.y -= 400
+                        self.rect.x = target.rect.x - 300 + (700 * self.flip)
+                        self.attack_effect_executions += 1
 
         def attack_triggers():
             # The attacking rectangle will only activate at certain frame_indexes (with some having varying DPS):
@@ -293,6 +337,7 @@ class Heihachi(Fighter):
                 if self.attacking:
                     # Updating attack list
                     self.attack_list_trigger = [False]
+                    self.attack_effect_executions = 0
 
                     self.attacking = False
                     for attack in self.attack_data.values():
@@ -340,6 +385,8 @@ class Heihachi(Fighter):
                     for attack in self.attack_data.values():
                         attack["trigger"] = False
 
+                    self.attack_effect_executions = 0
+
                     self.normal_combo_count = 0
         elif self.attacking:
             for attack in self.attack_data.values():
@@ -358,8 +405,8 @@ class Heihachi(Fighter):
 
 
     class Ranged_Heihachi(Ranged_Attack):
-        def __init__(self, flip, attack_animation_list, action, character_rect, character):
-            super().__init__(flip, attack_animation_list, action, character_rect, character)
+        def __init__(self, flip, attack_animation_list, action, character_rect, character, opponent):
+            super().__init__(flip, attack_animation_list, action, character_rect, character, opponent)
 
             # Create Rectangle
             self.rect = self.create_rectangle(character_rect)  # To check the position of the character
@@ -373,7 +420,7 @@ class Heihachi(Fighter):
 
             # Special Attack Down
             if self.action == 0:
-                rect = pygame.Rect(character_rect.centerx - (230 * self.flip),
+                rect = pygame.Rect(character_rect.centerx + 60 - (350 * self.flip),
                                    character_rect.y - 75, 230,
                                    75 + character_rect.height)
 
@@ -423,6 +470,8 @@ class Heihachi(Fighter):
                     else:
                         self.rect.right = 1280 + 800
 
+                self.rect.x += 5 + (-10 * self.flip)
+
             elif self.action == 3:  # Special Attack
                 # Increments the frame index
                 if (pygame.time.get_ticks() - self.update_time) > 180:
@@ -432,6 +481,9 @@ class Heihachi(Fighter):
                 # If the end of the animation is reached:
                 if self.frame_index >= len(self.attack_animation_list[self.action]):
                     self.frame_index = len(self.attack_animation_list[self.action]) - 1
+
+                self.rect.x += 9 + (-18 * self.flip)
+
             elif self.action == 0:  # Special Attack Down
                 # Increments the frame index
                 if (pygame.time.get_ticks() - self.update_time) > 180:
@@ -460,15 +512,18 @@ class Heihachi(Fighter):
                     else:
                         self.rect.right = 1280 + 800
 
-            # Image movement
-            self.rect.x += 2 + (-4 * self.flip)
+                if 0 <= self.frame_index <= 3:
+                    self.rect.x += 5 + (-10 * self.flip)
 
         def attack_collisions(self, target):
             if self.rect.colliderect(target.rect):
                 if not self.collision:
                     self.collision = True
-                    target.hit = True
-                    target.health -= 5
+                    if not target.block:
+                        target.hit = True
+                        target.health -= 5
+                    else:
+                        target.shield_health -= 20
                     # Knock-back
                     if target.flip:
                         target.rect.x += 25

@@ -16,20 +16,7 @@ class Uryu(Fighter):
         self.projectile_list = self.load_images(sprite_sheet, animation_steps, "projectiles")
         self.image = self.animation_list[self.action][self.frame_index]
         # Attack
-        self.attack_data = {
-            "normal_attack": {"trigger": False, "cooldown":100, "frame_index":4, "damage": 1, "knockback": 1, "action":9, "range_attack":True, "range_attack_action": 7},
-            "normal_attack_up": {"trigger": False, "cooldown":100, "frame_index":3, "damage": 1, "knockback": 1, "action":19, "range_attack":True, "range_attack_action":20 },
-            "normal_attack_down": {"trigger": False, "cooldown":100, "frame_index":4, "damage": 1, "knockback": 1, "action":8, "range_attack":True,"range_attack_action": 11},
-            "normal_jump_attack": {"trigger": False, "cooldown":100, "frame_index":3, "damage": 1, "knockback": 1, "action":22, "range_attack":True,"range_attack_action": 23},
-            "normal_attack_forward": {"trigger": False, "cooldown": 100, "frame_index":3, "damage": 1, "knockback": 1, "action":14, "range_attack":True,"range_attack_action":7},
-            "strong_attack": {"trigger": False, "cooldown":100, "frame_index":4, "damage": 1, "knockback": 1, "action":10, "range_attack":True,"range_attack_action": 7},
-            "strong_attack_up": {"trigger": False, "cooldown":100, "frame_index":3, "damage": 1, "knockback": 1, "action":12, "range_attack":True,"range_attack_action":3},
-            "strong_attack_down": {"trigger": False, "cooldown":100, "frame_index":2<=self.frame_index<=6, "damage": 1, "knockback": 1, "action":5, "range_attack":True,"range_attack_action":25},
-            "strong_jump_attack": {"trigger": False, "cooldown":100, "frame_index":4, "damage": 1, "knockback": 1, "action":18, "range_attack":True,"range_attack_action":6},
-            "special_attack": {"trigger": False, "cooldown":100, "frame_index":9, "damage": 1, "knockback": 1, "action":2, "range_attack":True,"range_attack_action": 1},
-            "special_attack_up": {"trigger": False, "cooldown":100, "frame_index":3, "damage": 1, "knockback": 1, "action":4, "range_attack":True,"range_attack_action": 11},
-            "special_attack_down": {"trigger": False, "cooldown":100, "frame_index":0, "damage": 1, "knockback": 1, "action":21, "range_attack":True,"range_attack_action": 0}
-        }
+        self.attack_data = self.get_attack_data()
 
     # Image Methods
     def load_images(self, sprite_sheet, animation_steps, choice):
@@ -81,11 +68,8 @@ class Uryu(Fighter):
         pygame.draw.rect(surface, (255, 0, 0), self.rect, 4)
 
     # Attack Methods
-
-    # Attack Methods
-    def update_attack_data(self):
-        # Continuous declaration to update the values like Rect Position and Trigger Values
-        self.attack_data = {
+    def get_attack_data(self):
+        data = {
             "normal_attack": {"trigger": False, "cooldown": 100, "frame_index": 4, "damage": 1, "knockback": 1,
                               "action": 9, "range_attack": True, "range_attack_action": 7},
             "normal_attack_up": {"trigger": False, "cooldown": 100, "frame_index": 3, "damage": 1, "knockback": 1,
@@ -112,6 +96,12 @@ class Uryu(Fighter):
             "special_attack_down": {"trigger": False, "cooldown": 100, "frame_index": 0, "damage": 1, "knockback": 1,
                                     "action": 21, "range_attack": True, "range_attack_action": 0}
         }
+        return data
+
+    def update_attack_data(self):
+        # Continuous declaration to update the values like Rect Position and Trigger Values
+        self.attack_data = self.get_attack_data()
+
         for key, value in self.attack_triggers.items():
             if key in self.attack_data.keys():
                 self.attack_data[key]["trigger"] = value["trigger"]
@@ -135,7 +125,7 @@ class Uryu(Fighter):
             self.ranged_attack_instance_list.append("ranged_attack_instance_"
                                                     + str(len(self.ranged_attack_instance_list)))
             self.ranged_attack_instance_list[len(self.ranged_attack_instance_list) - 1] = \
-                self.Ranged_Uryu(self.flip, self.projectile_list, action, self.rect, "Uryu")
+                self.Ranged_Uryu(self.flip, self.projectile_list, action, self.rect, "Uryu", self.opponent)
 
         def attack_triggers():
             # The attacking rectangle will only activate at certain frame_indexes (with some having varying DPS):
@@ -274,8 +264,8 @@ class Uryu(Fighter):
         return pygame.time.get_ticks() - self.update_time
 
     class Ranged_Uryu(Ranged_Attack):
-        def __init__(self, flip, attack_animation_list, action, character_rect, character):
-            super().__init__(flip, attack_animation_list, action, character_rect, character)
+        def __init__(self, flip, attack_animation_list, action, character_rect, character, opponent):
+            super().__init__(flip, attack_animation_list, action, character_rect, character, opponent)
 
             # Create Rectangle
             self.rect = self.create_rectangle(character_rect)  # To check the position of the character
@@ -286,58 +276,81 @@ class Uryu(Fighter):
             self.special_rangeImage_1 = self.attack_animation_list[self.action][self.special_frameIndex_1]
             self.special_rangeImage_2 = self.attack_animation_list[self.action][self.special_frameIndex_2]
 
+            # Attack
+            self.attack_data = {
+                    "strong_attack_up": {"action": 24, "trigger": False, "cooldown": 160},
+                    "strong_attack_down": {"action": 20, "trigger": False, "cooldown": 160},
+                    "strong_jump_attack": {"action": 19, "trigger": False, "cooldown": 160},
+                    "special_attack_up": {"action": 18, "trigger": False, "cooldown": 160},
+                    "special_attack_down": {"action": 26, "trigger": False, "cooldown": 160}
+                }
+
+        def get_attack_data(self):
+            data = {
+                "normal_attack" : {"action": 7, "trigger": False, "cooldown":140},
+                "normal_attack_up": {"action":20, "trigger":False, "cooldown":140},
+                "normal_attack_down": {"action": 11, "trigger":False, "cooldown":140},
+                "normal_jump_attack": {"action": 23, "trigger":False, "cooldown":140},
+
+                "strong_attack": {"action": 7, "trigger":False, "cooldown":140},
+                "strong_attack_up": {"action": 3, "trigger":False, "cooldown":140},
+                "strong_attack_down": {"action": 25, "trigger":False, "cooldown":140},
+                "strong_jump_attack": {"action": 6, "trigger":False, "cooldown":140},
+
+                "special_attack": {"action": 1, "trigger":False, "cooldown":140},
+                "special_attack_up": {"action": 11, "trigger":False, "cooldown":140},
+                "special_attack_down": {"action":0, "trigger" :False, "cooldown":200}
+            }
+            return data
+
+        def update_attack_data(self):
+            self.attack_data = self.get_attack_data()
+
+            for attack in self.attack_data.values():
+                if self.action == attack["action"]:
+                    attack["trigger"] = True
+
         def create_rectangle(self, character_rect):
-            if self.action == 0:
-                rect = pygame.Rect(character_rect.centerx - 280 - (280 * character_rect.width * self.flip),
-                                   character_rect.y - 50, 560,
-                                   50 + character_rect.height)
-            elif self.action == 1:
-                rect = pygame.Rect(character_rect.centerx - (200 * character_rect.width * self.flip),
-                                   character_rect.y + 20, 200,
-                                   0.9 * character_rect.height)
+            if self.action == 0:  # Special Down
+                rect = pygame.Rect(character_rect.centerx - 280,
+                                   character_rect.y - 50, 560, 50 + character_rect.height)
+            elif self.action == 1:  # Special Attack
+                rect = pygame.Rect(character_rect.centerx - (200 * self.flip),
+                                   character_rect.y + 20, 200, 140)
 
-            elif self.action == 7 or self.action == 11:
-                rect = pygame.Rect(character_rect.centerx - (1.4 * character_rect.width * self.flip),
-                                   character_rect.y + 20, 1.4 * character_rect.width,
-                                   0.4 * character_rect.height)
+            elif self.action == 7:  # Strong Attack or Normal
+                rect = pygame.Rect(character_rect.centerx - (140 * self.flip),
+                                   character_rect.y + 20, 140, 74)
 
-            elif self.action == 23:
+            elif self.action == 23:  # Normal Jump Attack
                 rect = pygame.Rect(character_rect.centerx - (120 * self.flip),
-                                   character_rect.y + 40, 120,
-                                   0.8 * character_rect.height)
+                                   character_rect.y + 40, 120, -30 + character_rect.height)
 
-            elif self.action == 20:
+            elif self.action == 20:  # Normal Up
                 rect = pygame.Rect(character_rect.centerx - (120 * self.flip),
-                                   character_rect.y - 80, 120,
-                                   0.8 * character_rect.height)
+                                   character_rect.y - 80, 120, -30 + character_rect.height)
 
-            elif self.action == 6:
-                rect = pygame.Rect(character_rect.centerx - 10 + (20 * self.flip),
-                                   character_rect.y + character_rect.height, 60,
-                                   1 * character_rect.height)
+            elif self.action == 6:  # Strong Jump Attack
+                rect = pygame.Rect(character_rect.centerx - 10 - (40 * self.flip),
+                                   character_rect.bottom - 20, 60, character_rect.height)
 
-            elif self.action == 3:
+            elif self.action == 3:  # Strong Up
                 rect = pygame.Rect(character_rect.centerx - 20 - (20 * self.flip),
-                                   character_rect.y - character_rect.height, 60,
-                                   1 * character_rect.height)
+                                   character_rect.y - 100, 60, character_rect.height)
 
-            elif self.action == 25:
+            elif self.action == 25:  # Strong Down
                 rect = pygame.Rect(character_rect.centerx - (100 * self.flip),
-                                   character_rect.y, 100,
-                                   1 * character_rect.height)
+                                   character_rect.y, 100, character_rect.height)
 
-            elif self.action == 11:
-                rect = pygame.Rect(character_rect.centerx - (100 * self.flip),
-                                   character_rect.y, 100,
-                                   1 * character_rect.height)
+            elif self.action == 11:  # Special Up or Normal Down
+                rect = pygame.Rect(character_rect.centerx - (140 * self.flip),
+                                   character_rect.y, 140, 70)
 
             else:
-                rect = pygame.Rect(character_rect.centerx - (1.7 * character_rect.width * self.flip),
-                                   character_rect.y + 30, 1.9 * character_rect.width,
-                                   0.7 * character_rect.height)
+                rect = pygame.Rect(character_rect.centerx - (220 * self.flip),
+                                   character_rect.y + 30, 220, 80)
 
             return rect
-
 
         def draw_ranged_attack(self, surface, offset, image_scale):
             # Drawing Ranged Attacks
@@ -410,7 +423,7 @@ class Uryu(Fighter):
                 pygame.draw.rect(surface, (143, 24, 199), self.rect, 4)
 
         def update_ranged_attack(self, surface):
-            animation_cooldown = 140
+            self.update_attack_data()
 
             # Refresh the image
             self.image = self.attack_animation_list[self.action][self.frame_index]
@@ -427,15 +440,17 @@ class Uryu(Fighter):
                     self.special_frameIndex_2 = 3
 
             # Increments the frame index
-            if (pygame.time.get_ticks() - self.update_time) > animation_cooldown:
-                self.frame_index += 1
+            for attack in self.attack_data.values():
+                if attack["trigger"]:
+                    if pygame.time.get_ticks() - self.update_time > attack["cooldown"]:
+                        self.frame_index += 1
 
-                # Special Attack
-                if self.action == 1:
-                    self.special_frameIndex_1 += 1
-                    self.special_frameIndex_2 += 1
+                        # Special Attack
+                        if self.action == 1:
+                            self.special_frameIndex_1 += 1
+                            self.special_frameIndex_2 += 1
 
-                self.update_time = pygame.time.get_ticks()
+                        self.update_time = pygame.time.get_ticks()
 
             # Frames Before Collision
             if (self.action == 7 or self.action == 6 or self.action == 3) and not self.collision:
@@ -468,28 +483,28 @@ class Uryu(Fighter):
             # Image movement
             # Jump Normal Attack
             if self.action == 23:
-                self.rect.x += 2 + (-4 * self.flip)
-                self.rect.y += 2
+                self.rect.x += 8 + (-16 * self.flip)
+                self.rect.y += 9
 
             # Normal Attack Up
             elif self.action == 20:
-                self.rect.x += 2 + (-4 * self.flip)
-                self.rect.y -= 2
+                self.rect.x += 9 + (-18 * self.flip)
+                self.rect.y -= 10
 
             # Jump Strong
             elif self.action == 6:
-                self.rect.y += 2
+                self.rect.y += 12
 
             # Strong Up
             elif self.action == 3:
-                self.rect.y -= 2
+                self.rect.y -= 12
 
             # Strong Up and Special Down
             elif self.action == 25 or self.action == 0:
-                pass
+                pass  # Do nothing
 
             else:
-                self.rect.x += 2 + (-4 * self.flip)
+                self.rect.x += 10 + (-20 * self.flip)
 
             # Off the screen
             if self.action == 7 and self.frame_index == 7:
@@ -503,8 +518,13 @@ class Uryu(Fighter):
             if self.rect.colliderect(target.rect):
                 if self.collision == False:
                     self.collision = True
-                    target.hit = True
-                    target.health -= 5
+
+                    if not target.block:
+                        target.hit = True
+                        target.health -= 5
+                    else:
+                        target.shield_health -= 20
+
                     # Knock-back
                     if target.flip:
                         target.rect.x += 25

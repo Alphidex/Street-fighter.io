@@ -9,7 +9,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b5cd2ac9-97d8-43a2-a676-0c1663c2c34b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Characters_Code/Asuka.py" beforeDir="false" afterPath="$PROJECT_DIR$/Characters_Code/Asuka.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Characters_Code/Daichi.py" beforeDir="false" afterPath="$PROJECT_DIR$/Characters_Code/Daichi.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Characters_Code/Gyamon.py" beforeDir="false" afterPath="$PROJECT_DIR$/Characters_Code/Gyamon.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Characters_Code/Heihachi.py" beforeDir="false" afterPath="$PROJECT_DIR$/Characters_Code/Heihachi.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Characters_Code/Ichigo.py" beforeDir="false" afterPath="$PROJECT_DIR$/Characters_Code/Ichigo.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Characters_Code/Renji.py" beforeDir="false" afterPath="$PROJECT_DIR$/Characters_Code/Renji.py" afterDir="false" />
@@ -17,6 +20,15 @@
       <change beforePath="$PROJECT_DIR$/Characters_Code/Toshiro.py" beforeDir="false" afterPath="$PROJECT_DIR$/Characters_Code/Toshiro.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Characters_Code/Uryu.py" beforeDir="false" afterPath="$PROJECT_DIR$/Characters_Code/Uryu.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Characters_Code/Zoro.py" beforeDir="false" afterPath="$PROJECT_DIR$/Characters_Code/Zoro.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/GUI.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Images/Background Images/pixel art game menu.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/Images/Background Images/pixel art game menu.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Images/Game Characters Organised/Renji/Base/Walk.png" beforeDir="false" afterPath="$PROJECT_DIR$/Images/Game Characters Organised/Renji/Base/Walk.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Images/Game Characters Organised/Renji/Result.png" beforeDir="false" afterPath="$PROJECT_DIR$/Images/Game Characters Organised/Renji/Result.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Images/Game Characters Organised/Renji/Strong Attack/Strong Air 200 x 200.png" beforeDir="false" afterPath="$PROJECT_DIR$/Images/Game Characters Organised/Renji/Strong Attack/Strong Air 200 x 200.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Images/Game Characters Organised/Renji/Strong Attack/Strong.png" beforeDir="false" afterPath="$PROJECT_DIR$/Images/Game Characters Organised/Renji/Strong Attack/Strong.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/character_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/character_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/characters.py" beforeDir="false" afterPath="$PROJECT_DIR$/characters.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/game_HUB.py" beforeDir="false" afterPath="$PROJECT_DIR$/game_HUB.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -96,6 +108,21 @@
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="Branch">
+          <value>
+            <list>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="main" />
+                </option>
+              </RecentGroup>
+            </list>
+          </value>
+        </entry>
+      </map>
+    </option>
     <option name="TAB_STATES">
       <map>
         <entry key="MAIN">

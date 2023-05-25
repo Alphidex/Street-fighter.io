@@ -1,5 +1,6 @@
 import pygame
 from debug import debug, Select_Rect
+from GUI import Create_Shield, Display_Character_Stats
 
 """ 
 To Fix:
@@ -39,8 +40,14 @@ class Fighter(pygame.sprite.Sprite):
         # Fighter Status
         self.hit = False
         self.knockback = False
+        self.stun = False
         self.dead = False
         self.block = False
+        self.shield_health = 100
+        self.create_shield = Create_Shield(self.shield_health)
+        self.shield_broken = False
+        self.shield_cooldown_timer = None
+        self.in_air = False
 
         # Display
         self.screen = pygame.display.get_surface()
@@ -58,6 +65,9 @@ class Fighter(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft=(x, y))
         self.rect.width, self.rect.height = 100, 143
 
+        # Fighter GUI
+        self.fighter_gui = Display_Character_Stats(self.player, self.health, self.rect)
+
         # Gravity
         self.vel_y = 0  # Keeps track of speed when the character is accelerating down due to gravity
 
@@ -67,9 +77,17 @@ class Fighter(pygame.sprite.Sprite):
         self.jump = [False, False]
         self.jumping = False
 
+        # Animations
+        self.extend_attack = None
+        self.position_checkpoint = 0
+
         # Attacks
         self.attacking = False
         self.attack_list_trigger = [False]
+        # Separate from attack_list_trigger to allow a delay between the effect of an attack
+        # and when the rectangle triggers.
+        self.attack_effect_executions = 0
+        self.exclude_attacks = []
         self.attacking_rectangle = None
         # Ranged Attacks
         self.ranged_attack_instance_list = []
@@ -90,6 +108,7 @@ class Fighter(pygame.sprite.Sprite):
             "special_attack_up": {"trigger": False},
             "special_attack_down": {"trigger": False}
         }
+        self.attack_delay_list = {}
 
         # Clock
         self.update_time = pygame.time.get_ticks()
@@ -99,13 +118,18 @@ class Fighter(pygame.sprite.Sprite):
         self.paused_time = 0
         self.debug_rect = Select_Rect(pygame.display.get_surface())
 
+    # Opponent
     def set_opponent(self, opponent):
         self.opponent = opponent
 
+    # Running the game and sprites
     def run(self, target):
         self.draw(self.screen)
+        self.draw_character_stats()
+
         keys = pygame.key.get_pressed()
 
+        # Pause Mechanic
         if pygame.time.get_ticks() - self.paused_time > 300:
             if keys[pygame.K_p]:
                 self.paused_time = pygame.time.get_ticks()
@@ -117,10 +141,10 @@ class Fighter(pygame.sprite.Sprite):
             self.move(target)
             self.update(target, self.screen)
 
-    def draw(self, screen):
-        pass
+    def draw_character_stats(self):
+       self.fighter_gui.draw_everything(self.health, self.rect)
 
-    def update(self, target, screen):
+    def draw(self, screen):
         pass
 
     def draw_character_rect(self):
@@ -132,30 +156,17 @@ class Fighter(pygame.sprite.Sprite):
     def load_images(self, x, y, z):
         pass
 
-    def borders(self, SCREEN_WIDTH, SCREEN_HEIGHT, dx, dy):
-        # For x Variable
-        if self.rect.left + dx < 0:
-            dx = 0 - self.rect.left
-        if self.rect.right + dx > SCREEN_WIDTH:
-            dx = SCREEN_WIDTH - self.rect.right
+    # Update game state
+    def update(self, target, screen):
+        pass
 
-        # For Y Variable
-        if self.rect.bottom + dy > 550:
-            self.vel_y = 0
-            dy = 550 - self.rect.bottom
-            self.jump[0], self.jump[1] = False, False
-
-        return dx, dy
-
-    def time_passed(self):
-        return pygame.time.get_ticks() - self.update_time
-
+    # Key Presses + Movement
     def check_key_presses(self, key, dx, SPEED):
         # Checking if character is in air
         if self.rect.bottom < 550:
-            chr_in_air = True
+            self.in_air = True
         else:
-            chr_in_air = False
+            self.in_air = False
 
         if not self.dead:
             for dic_key in self.control_keys.keys():
@@ -186,8 +197,11 @@ class Fighter(pygame.sprite.Sprite):
                                 self.jumping = True
 
                         # Blocking
-                        if key[self.control_keys[player]["block"]] and (not chr_in_air):
-                            self.block = True
+                        self.shield_cooldown()
+                        if key[self.control_keys[player]["block"]]:
+                            if not self.in_air and not self.running and not self.shield_broken:
+                                self.block = True
+                                self.create_shield.change_shield_color(self.shield_health, self.rect.center)
                         else:
                             self.block = False
 
@@ -196,42 +210,104 @@ class Fighter(pygame.sprite.Sprite):
                                 or key[self.control_keys[player]["strong_attack"]] \
                                 or key[self.control_keys[player]["special_attack"]]:
 
-                            self.attacking = True
+                            # Cancel the block
+                            self.block = False
 
-                            # Normal Attack Attacks
+                            # Normal Attacks
                             if key[self.control_keys[player]["normal_attack"]]:
-                                if chr_in_air:
+                                if self.in_air and self.attack_cooldown("normal_jump_attack"):
                                     self.attack_triggers["normal_jump_attack"]["trigger"] = True
                                 elif key[self.control_keys[player]["down"]]:
-                                    self.attack_triggers["normal_attack_down"]["trigger"] = True
+                                    if self.attack_cooldown("normal_attack_down"):
+                                        self.attack_triggers["normal_attack_down"]["trigger"] = True
                                 elif key[self.control_keys[player]["up"]]:
-                                    self.attack_triggers["normal_attack_up"]["trigger"] = True
+                                    if self.attack_cooldown("normal_attack_up"):
+                                        self.attack_triggers["normal_attack_up"]["trigger"] = True
                                 else:
                                     self.combo_attack_logic()
 
                             # Strong Attack Attacks
                             if key[self.control_keys[player]["strong_attack"]]:
-                                if chr_in_air:
+                                if self.in_air and self.attack_cooldown("strong_jump_attack"):
                                     self.attack_triggers["strong_jump_attack"]["trigger"] = True
                                 elif key[self.control_keys[player]["down"]]:
-                                    self.attack_triggers["strong_attack_down"]["trigger"] = True
+                                    if self.attack_cooldown("strong_attack_down"):
+                                        self.attack_triggers["strong_attack_down"]["trigger"] = True
                                 elif key[self.control_keys[player]["up"]]:
-                                    self.attack_triggers["strong_attack_up"]["trigger"] = True
+                                    if self.attack_cooldown("strong_attack_up"):
+                                        self.attack_triggers["strong_attack_up"]["trigger"] = True
                                 else:
-                                    self.attack_triggers["strong_attack"]["trigger"] = True
+                                    if self.attack_cooldown("strong_attack"):
+                                        self.attack_triggers["strong_attack"]["trigger"] = True
 
                             # Special Attack Attacks
                             if key[self.control_keys[player]["special_attack"]]:
                                 if key[self.control_keys[player]["down"]]:
-                                    self.attack_triggers["special_attack_down"]["trigger"] = True
+                                    if self.attack_cooldown("special_attack_down") and "special_attack_down" \
+                                            not in self.exclude_attacks:
+                                        self.attack_triggers["special_attack_down"]["trigger"] = True
                                 elif key[self.control_keys[player]["up"]]:
-                                    self.attack_triggers["special_attack_up"]["trigger"] = True
+                                    if self.attack_cooldown("special_attack_up") \
+                                            and "special_attack_up" not in self.exclude_attacks:
+                                        self.attack_triggers["special_attack_up"]["trigger"] = True
                                 else:
-                                    self.attack_triggers["special_attack"]["trigger"] = True
+                                    if self.attack_cooldown("special_attack") and "special_attack" not in self.exclude_attacks:
+                                        self.attack_triggers["special_attack"]["trigger"] = True
 
-                            # Update the attack_list_trigger
-                            self.attack_list_trigger *= 50
+                            for attack in self.attack_triggers.values():
+                                if attack["trigger"]:
+                                    self.attacking = True
+
+                            if self.attacking:
+                                # Update the attack_list_trigger
+                                self.attack_list_trigger *= 50
+
         return dx
+
+    def move(self, target):
+        # Variables
+        SPEED = 7
+        GRAVITY = 1.7
+        dx = 0
+        dy = 0
+        self.running = False
+        key = pygame.key.get_pressed()
+
+        self.draw_character_rect()
+        dx = self.check_key_presses(key, dx, SPEED)
+
+        # Define Gravity
+        self.vel_y += GRAVITY
+        dy += self.vel_y
+
+        # Attacking in air, holds you in air
+        if self.attack_triggers["normal_jump_attack"]["trigger"] or self.attack_triggers["strong_jump_attack"]["trigger"]:
+            dy = 0
+            self.vel_y = 0
+
+        # dx and dy are returned once calculations are done
+        dx, dy = self.borders(self.screen.get_width(), self.screen.get_height(), dx, dy)
+
+        self.direction_system(key, target)
+
+        # UPDATE POSITION OF RECTANGLE
+        self.rect.x += dx
+        self.rect.y += dy
+
+    def borders(self, SCREEN_WIDTH, SCREEN_HEIGHT, dx, dy):
+        # For x Variable
+        if self.rect.left + dx < 0:
+            dx = 0 - self.rect.left
+        if self.rect.right + dx > SCREEN_WIDTH:
+            dx = SCREEN_WIDTH - self.rect.right
+
+        # For Y Variable
+        if self.rect.bottom + dy > 550:
+            self.vel_y = 0
+            dy = 550 - self.rect.bottom
+            self.jump[0], self.jump[1] = False, False
+
+        return dx, dy
 
     def direction_system(self, key, target):
         # Ensure players face each other but not when moving
@@ -274,6 +350,7 @@ class Fighter(pygame.sprite.Sprite):
             if self.dash:
                 self.rect.x += 30 + (-60 * self.flip)
 
+    # Attacks
     def combo_attack_logic(self):
         # Combo attacks
         # Update module (preparation)
@@ -293,41 +370,41 @@ class Fighter(pygame.sprite.Sprite):
         self.normal_combo_count += 1
         self.normal_combo_timer = pygame.time.get_ticks()
 
-    def move(self, target):
-        # Variables
-        SPEED = 7
-        GRAVITY = 2
-        dx = 0
-        dy = 0
-        self.running = False
-        key = pygame.key.get_pressed()
+    def attack_cooldown(self, attack):
+        if attack not in self.attack_delay_list:
+            return True
+        else:
+            if self.attack_delay_list[attack]["last_time_used"] is not None:
+                if pygame.time.get_ticks() - self.attack_delay_list[attack]["last_time_used"] > self.attack_delay_list[attack]["delay"]:
+                    return True
+                else:
+                    return False
+            else:
+                return True
+    
+    def shield_cooldown(self):
+        if self.shield_health <= 0 and not self.shield_broken:
+            self.shield_broken = True
+            self.shield_cooldown_timer = pygame.time.get_ticks()
+            self.block = False
 
-        self.draw_character_rect()
-        dx = self.check_key_presses(key, dx, SPEED)
+        if self.shield_broken:
+            if pygame.time.get_ticks() - self.shield_cooldown_timer > 4000:
+                self.shield_health = 100
+                self.shield_broken = False
+                self.create_shield.current_color = pygame.Color(0, 0, 255)
 
-        # Define Gravity
-        self.vel_y += GRAVITY
-        dy += self.vel_y
+    # Time
+    def time_passed(self):
+        return pygame.time.get_ticks() - self.update_time
 
-        # Attacking in air, holds you in air
-        if self.attack_triggers["normal_jump_attack"]["trigger"] or self.attack_triggers["strong_jump_attack"]["trigger"]:
-            dy = 0
-            self.vel_y = 0
+class Ranged_Attack(pygame.sprite.Sprite):
+    def __init__(self, flip, attack_animation_list, action, character_rect, character, opponent):
+        super().__init__()
 
-        # dx and dy are returned once calculations are done
-        dx, dy = self.borders(self.screen.get_width(), self.screen.get_height(), dx, dy)
-
-        self.direction_system(key, target)
-
-        # UPDATE POSITION OF RECTANGLE
-        self.rect.x += dx
-        self.rect.y += dy
-
-
-class Ranged_Attack:
-    def __init__(self, flip, attack_animation_list, action, character_rect, character):
         # Data
         self.character = character
+        self.opponent = opponent
         self.flip = flip
         self.attacking = True
 
@@ -338,7 +415,7 @@ class Ranged_Attack:
         self.collision = False
 
         # Animations
-        self.action = action  # 0 - Attack #1 - Death #2 - Idle #3 - Attack #4
+        self.action = action
         self.frame_index = 0
         self.image = attack_animation_list[self.action][self.frame_index]
         self.attack_animation_list = attack_animation_list

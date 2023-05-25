@@ -16,19 +16,8 @@ class Gyamon(Fighter):
         self.image = self.animation_list[self.action][self.frame_index]
 
         # Attacks
-        self.attack_data = {
-            "normal_attack": {"trigger": False, "cooldown": 70, "frame_index": 3, "damage": 1, "knockback": 1, "action": 5, "range_attack": False, "rect": pygame.Rect(self.rect.centerx - (1.7 * self.rect.width * self.flip),self.rect.y * 1.2, 1.7 * self.rect.width,0.55 * self.rect.height)},
-            "normal_attack_up": {"trigger": False, "cooldown": 70, "frame_index": 6, "damage": 1, "knockback": 1, "action": 2, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - (1.5 * self.rect.width * self.flip),self.rect.y * 0.8, 1.5 * self.rect.width,1.4 * self.rect.height)},
-            "normal_attack_down": {"trigger": False, "cooldown": 60, "frame_index": 3, "damage": 1, "knockback": 1, "action": 6, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - (1.5 * self.rect.width * self.flip),self.rect.y * 1.22, 1.5 * self.rect.width,0.75 * self.rect.height)},
-            "normal_jump_attack": {"trigger": False, "cooldown": 85, "frame_index": 3, "damage": 1, "knockback": 1, "action": 9, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - (1.4 * self.rect.width * self.flip),self.rect.y + 60, 1.5 * self.rect.width, 0.6 * self.rect.height)},
-            "strong_attack": {"trigger": False, "cooldown": 100, "frame_index": 3, "damage": 1, "knockback": 1, "action": 8, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - (5 * self.rect.width * self.flip),self.rect.y, 5 * self.rect.width,1 * self.rect.height)},
-            "strong_attack_up": {"trigger": False, "cooldown": 90, "frame_index": 5, "damage": 1, "knockback": 1, "action": 4, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - (1.65 * self.rect.width * self.flip),self.rect.y, 1.65 * self.rect.width,1 * self.rect.height)},
-            "strong_attack_down": {"trigger": False, "cooldown": 90, "frame_index": 4, "damage": 1, "knockback": 1, "action": 3, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - (1.9 * self.rect.width * self.flip),self.rect.y * 1.14, 1.9 * self.rect.width,0.7 * self.rect.height)},
-            "strong_jump_attack": {"trigger": False, "cooldown": 70, "frame_index": 2, "damage": 1, "knockback": 1, "action": 13, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - 50 - (30 * self.flip),self.rect.y - 80, 1.3 * self.rect.width,1.4 * self.rect.height)},
-            "special_attack": {"trigger": False, "cooldown": 100, "frame_index": 8<= self.frame_index<= 25, "damage": 1, "knockback": 1, "action": 0, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - (3.4 * self.rect.width * self.flip),self.rect.y * 0.9, 3.4 * self.rect.width,1.5 * self.rect.height)},
-            "special_attack_down": {"trigger": False, "cooldown": 100, "frame_index": self.frame_index == 3 or self.frame_index == 8 or self.frame_index == 9, "damage": 1, "knockback": 1, "action": 1, "range_attack": True, "rect": [pygame.Rect(self.rect.centerx - (1.83 * self.rect.width * self.flip),self.rect.y, 1.83 * self.rect.width, 1.15 * self.rect.height),
-                                                                                                                                                                                                                                        pygame.Rect(self.rect.centerx - (5 * self.rect.width * self.flip),self.rect.y * 0.9, 5 * self.rect.width,1.5 * self.rect.height)]}
-        }
+        self.attack_data = self.get_attack_data()
+        self.exclude_attacks = ["special_attack_up"]
 
     # Image Methods
     def load_images(self, sprite_sheet, animation_steps, choice):
@@ -73,105 +62,68 @@ class Gyamon(Fighter):
         if self.action == 0:
             if not self.flip:
                 surface.blit(img, (
-                    self.rect.x - ((self.offset[0] + 29) * self.image_scale),
-                    self.rect.y - ((self.offset[1] + 93) * self.image_scale)))
+                    self.rect.x - ((self.offset[0] + 32) * self.image_scale),
+                    self.rect.y - ((self.offset[1] + 110) * self.image_scale)))
             else:
                 surface.blit(img, (
-                    self.rect.x - ((self.offset[0] + 29) * self.image_scale * 1.9),
-                    self.rect.y - ((self.offset[1] + 93) * self.image_scale)))
+                    self.rect.x - ((self.offset[0] + 32) * self.image_scale * 1.9),
+                    self.rect.y - ((self.offset[1] + 110) * self.image_scale)))
         else:
             if not self.flip:
                 surface.blit(img, (
                     self.rect.x - (self.offset[0] * self.image_scale),
-                    self.rect.y - (self.offset[1] * self.image_scale)))
+                    self.rect.y - ((self.offset[1] + 14) * self.image_scale)))
             else:
                 surface.blit(img, (
                     self.rect.x - (self.offset[0] * self.image_scale),
-                    self.rect.y - (self.offset[1] * self.image_scale)))
+                    self.rect.y - ((self.offset[1] + 14) * self.image_scale)))
 
     # Attack Methods
+    def get_attack_data(self):
+        data = {
+            "normal_attack": {"trigger": False, "cooldown": 70, "frame_index": 3, "damage": 1, "knockback": 1, "action": 5, "range_attack": False, "rect": pygame.Rect(self.rect.centerx - (165 * self.flip), self.rect.y + 65, 165, 0.55 * self.rect.height)},
+            "normal_attack_up": {"trigger": False, "cooldown": 70, "frame_index": 6, "damage": 1, "knockback": 1, "action": 2, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - (140 * self.flip), self.rect.y * 0.8, 120, 1.4 * self.rect.height)},
+            "normal_attack_down": {"trigger": False, "cooldown": 60, "frame_index": 3, "damage": 1, "knockback": 1, "action": 6, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - 30 - (0 * self.flip), self.rect.y + 70, 140, 0.75 * self.rect.height)},
+            "normal_jump_attack": {"trigger": False, "cooldown": 85, "frame_index": 3, "damage": 1, "knockback": 1, "action": 9, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - (1.4 * self.rect.width * self.flip),self.rect.y + 40, 1.5 * self.rect.width, 0.6 * self.rect.height)},
+            "strong_attack": {"trigger": False, "cooldown": 100, "frame_index": 3, "damage": 1, "knockback": 1, "action": 8, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - (5 * self.rect.width * self.flip),self.rect.y, 5 * self.rect.width,1 * self.rect.height)},
+            "strong_attack_up": {"trigger": False, "cooldown": 90, "frame_index": 5, "damage": 1, "knockback": 1, "action": 4, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - (1.65 * self.rect.width * self.flip),self.rect.y, 1.65 * self.rect.width,1 * self.rect.height)},
+            "strong_attack_down": {"trigger": False, "cooldown": 90, "frame_index": 4, "damage": 1, "knockback": 1, "action": 3, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - (1.9 * self.rect.width * self.flip),self.rect.y + 50, 1.9 * self.rect.width, 0.7 * self.rect.height)},
+            "strong_jump_attack": {"trigger": False, "cooldown": 70, "frame_index": 2, "damage": 1, "knockback": 1, "action": 13, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - 50 - (30 * self.flip),self.rect.y - 80, 1.3 * self.rect.width,1.4 * self.rect.height)},
+            "special_attack": {"trigger": False, "cooldown": 100, "frame_index": 8<= self.frame_index<= 25, "damage": 1, "knockback": 1, "action": 0, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - (3.4 * self.rect.width * self.flip),self.rect.y * 0.9, 3.4 * self.rect.width,1.5 * self.rect.height)},
+            "special_attack_down": {"trigger": False, "cooldown": 100, "frame_index": self.frame_index == 3 or self.frame_index == 8 or self.frame_index == 9, "damage": 1, "knockback": 1, "action": 1, "range_attack": True, "rect": pygame.Rect(self.rect.centerx - (1.83 * self.rect.width * self.flip),self.rect.y, 1.83 * self.rect.width, 1.15 * self.rect.height)}
+        }
+        return data
+
     def update_attack_data(self):
         # Continuous declaration to update the values like Rect Position and Trigger Values
-        self.attack_data = {
-            "normal_attack": {"trigger": False, "cooldown": 70, "frame_index": 3, "damage": 1, "knockback": 1,
-                              "action": 5, "range_attack": False,
-                              "rect": pygame.Rect(self.rect.centerx - (1.7 * self.rect.width * self.flip),
-                                                  self.rect.y * 1.2, 1.7 * self.rect.width, 0.55 * self.rect.height)},
-            "normal_attack_up": {"trigger": False, "cooldown": 70, "frame_index": 6, "damage": 1, "knockback": 1,
-                                 "action": 2, "range_attack": False,
-                                 "rect": pygame.Rect(self.rect.centerx - (1.5 * self.rect.width * self.flip),
-                                                     self.rect.y * 0.8, 1.5 * self.rect.width, 1.4 * self.rect.height)},
-            "normal_attack_down": {"trigger": False, "cooldown": 60, "frame_index": 3, "damage": 1, "knockback": 1,
-                                   "action": 6, "range_attack": False,
-                                   "rect": pygame.Rect(self.rect.centerx - (1.5 * self.rect.width * self.flip),
-                                                       self.rect.y * 1.22, 1.5 * self.rect.width,
-                                                       0.75 * self.rect.height)},
-            "normal_jump_attack": {"trigger": False, "cooldown": 85, "frame_index": 3, "damage": 1, "knockback": 1,
-                                   "action": 9, "range_attack": False,
-                                   "rect": pygame.Rect(self.rect.centerx - (1.4 * self.rect.width * self.flip),
-                                                       self.rect.y + 60, 1.5 * self.rect.width,
-                                                       0.6 * self.rect.height)},
-            "strong_attack": {"trigger": False, "cooldown": 100, "frame_index": 3, "damage": 1, "knockback": 1,
-                              "action": 8, "range_attack": False,
-                              "rect": pygame.Rect(self.rect.centerx - (5 * self.rect.width * self.flip), self.rect.y,
-                                                  5 * self.rect.width, 1 * self.rect.height)},
-            "strong_attack_up": {"trigger": False, "cooldown": 90, "frame_index": 5, "damage": 1, "knockback": 1,
-                                 "action": 4, "range_attack": False,
-                                 "rect": pygame.Rect(self.rect.centerx - (1.65 * self.rect.width * self.flip),
-                                                     self.rect.y, 1.65 * self.rect.width, 1 * self.rect.height)},
-            "strong_attack_down": {"trigger": False, "cooldown": 90, "frame_index": 4, "damage": 1, "knockback": 1,
-                                   "action": 3, "range_attack": False,
-                                   "rect": pygame.Rect(self.rect.centerx - (1.9 * self.rect.width * self.flip),
-                                                       self.rect.y * 1.14, 1.9 * self.rect.width,
-                                                       0.7 * self.rect.height)},
-            "strong_jump_attack": {"trigger": False, "cooldown": 70, "frame_index": 2, "damage": 1, "knockback": 1,
-                                   "action": 13, "range_attack": False,
-                                   "rect": pygame.Rect(self.rect.centerx - 50 - (30 * self.flip), self.rect.y - 80,
-                                                       1.3 * self.rect.width, 1.4 * self.rect.height)},
-            "special_attack": {"trigger": False, "cooldown": 100, "frame_index": 8 <= self.frame_index <= 25,
-                               "damage": 1, "knockback": 1, "action": 0, "range_attack": False,
-                               "rect": pygame.Rect(self.rect.centerx - (3.4 * self.rect.width * self.flip),
-                                                   self.rect.y * 0.9, 3.4 * self.rect.width, 1.5 * self.rect.height)},
-            "special_attack_down": {"trigger": False, "cooldown": 100,
-                                    "frame_index": self.frame_index == 3 or self.frame_index == 8 or self.frame_index == 9,
-                                    "damage": 1, "knockback": 1, "action": 1, "range_attack": True, "rect": [
-                    pygame.Rect(self.rect.centerx - (1.83 * self.rect.width * self.flip), self.rect.y,
-                                1.83 * self.rect.width, 1.15 * self.rect.height),
-                    pygame.Rect(self.rect.centerx - (5 * self.rect.width * self.flip), self.rect.y * 0.9,
-                                5 * self.rect.width, 1.5 * self.rect.height)]}
-        }
+        self.attack_data = self.get_attack_data()
+
         for key, value in self.attack_triggers.items():
             if key in self.attack_data.keys():
                 self.attack_data[key]["trigger"] = value["trigger"]
-
-    def attack_rectangle_collision(self, surface, target):
-        # HIT-BOXES
-        # elif self.special_attack_down:
-        #     if self.frame_index != 8:
-        #         self.attacking_rectangle = first rect
-        #     else:
-        #         self.attacking_rectangle = pygame.Rect(self.rect.centerx - (5 * self.rect.width * self.flip),
-        #                                                self.rect.y * 0.9, 5 * self.rect.width,
-        #                                                1.5 * self.rect.height)
-        # In case there's an error
-
-        # HIT-BOXES
-        self.update_attack_data()
 
         for attack in self.attack_data.values():
             if attack["trigger"]:
                 self.attacking_rectangle = attack["rect"]
 
+    def attack_rectangle_collision(self, surface, target):
+        # HIT-BOXES
+        self.update_attack_data()
+
         if self.attacking_rectangle is not None:
             # Rectangle collisions
             if self.attacking_rectangle.colliderect(target.rect):
-                target.hit = True
-                target.frame_index = 0
+                if not target.block:
+                    target.hit = True
+                    target.frame_index = 0
 
-                # Taking Damage
-                for attack in self.attack_data.values():
-                    if attack["trigger"]:
-                        target.health -= attack["damage"]
+                    # Taking Damage
+                    for attack in self.attack_data.values():
+                        if attack["trigger"]:
+                            target.health -= attack["damage"]
+
+                else:
+                    target.shield_health -= 20
 
                 # Knock-back - Once
                 if target.flip:
@@ -215,7 +167,7 @@ class Gyamon(Fighter):
                                                     + str(len(self.ranged_attack_instance_list)))
 
             self.ranged_attack_instance_list[len(self.ranged_attack_instance_list) - 1] = \
-                self.Ranged_Gyamon(self.flip, self.projectile_list, action, self.rect, "Gyamon")
+                self.Ranged_Gyamon(self.flip, self.projectile_list, action, self.rect, "Gyamon", self.opponent)
 
         def attack_effects():
             # Continuous knockback and effects
@@ -223,19 +175,36 @@ class Gyamon(Fighter):
                 if self.attack_data["special_attack"]["trigger"]:
                     target.rect.x += 2 + (-4 * self.flip)
 
-            # # Pull effect for Strong Attacks
-            # if self.strong_attack and not (-50 <= (target.rect.centerx - self.rect.centerx) <= 50):
-            #     target.rect.x -= 20 + (40 * self.flip)
-            #
-            # # Moving During Attacks
-            # if self.strong_attack_up:
-            #     self.rect.x += 20 - (40 * self.flip)
-            # if self.strong_attack_down:
-            #     self.rect.x += 50 - (100 * self.flip)
-            #
-            # # Teleport if Special Attack Attack Down
-            # if self.special_attack_down and self.frame_index == 8:
-            #     self.rect.centerx = target.rect.centerx - 100 + (200 * self.flip)
+            # Normal
+            if self.attack_data["normal_attack_down"]["trigger"]:
+                self.rect.x += 13 - (26 * self.flip)
+
+            if self.attack_data["normal_jump_attack"]["trigger"]:
+                if 2 <= self.frame_index <= 4:
+                    self.rect.x += 4 - (8 * self.flip)
+                    self.rect.y += 5
+
+            if self.attack_data["normal_attack_up"]["trigger"]:
+                if 5 <= self.frame_index <= 8:
+                    self.rect.x += 4 - (8 * self.flip)
+
+            # Strong
+            if self.attack_data["strong_attack"]["trigger"]:
+                if not(-50 <= (target.rect.centerx - self.rect.centerx) <= 50):
+                    target.rect.x -= 20 + (40 * self.flip)
+
+            if self.attack_data["strong_attack_down"]["trigger"]:
+                if 4 <= self.frame_index <= 6:
+                    self.rect.x += 4 - (8 * self.flip)
+
+            if self.attack_data["strong_jump_attack"]["trigger"]:
+                self.rect.x += 3 - (6 * self.flip)
+                self.rect.y -= 3
+
+            # Special
+            if self.attack_data["special_attack_down"]["trigger"]:
+                if self.frame_index == 8:
+                    self.rect.centerx = target.rect.centerx - 100 + (200 * self.flip)
 
         def attack_triggers():
             # The attacking rectangle will only activate at certain frame_indexes (with some having varying DPS):
@@ -397,58 +366,59 @@ class Gyamon(Fighter):
         return pygame.time.get_ticks() - self.update_time
 
     class Ranged_Gyamon(Ranged_Attack):
-        def __init__(self, flip, attack_animation_list, action, character_rect, character):
-            super().__init__(flip, attack_animation_list, action, character_rect, character)
+        def __init__(self, flip, attack_animation_list, action, character_rect, character, opponent):
+            super().__init__(flip, attack_animation_list, action, character_rect, character, opponent)
 
             # Create Rectangle
             self.rect = self.create_rectangle(character_rect)  # To check the position of the character
 
         def create_rectangle(self, character_rect):
+            # Special Attack Down
+            if self.action == 1:
+                rect = pygame.Rect(
+                    character_rect.centerx + 100 - ((1.5 * character_rect.width + 200) * self.flip),
+                    character_rect.y - 55, 1.5 * character_rect.width,
+                    1.4 * character_rect.height)
 
-            if self.character == "Gyamon":
-                # Special Attack Down
-                if self.action == 1:
-                    rect = pygame.Rect(
-                        character_rect.centerx + 100 - ((1.5 * character_rect.width + 200) * self.flip),
-                        character_rect.y - 55, 1.5 * character_rect.width,
-                        1.4 * character_rect.height)
             return rect
 
         def draw_ranged_attack(self, surface, offset, image_scale):
             # Drawing Ranged Attacks
             img = pygame.transform.flip(self.image, self.flip, False)
 
-            if self.character == "Gyamon":
-                if self.action == 1:  # Special Attack Down
-                    surface.blit(img, (
-                        self.rect.x + 20 - (offset[0] * image_scale),
-                        self.rect.y - (offset[1] * image_scale)))
-                    pygame.draw.rect(surface, (143, 24, 199), self.rect, 4)
+            if self.action == 1:  # Special Attack Down
+                surface.blit(img, (
+                    self.rect.x + 20 - (offset[0] * image_scale),
+                    self.rect.y - (offset[1] * image_scale)))
+                pygame.draw.rect(surface, (143, 24, 199), self.rect, 4)
 
         def update_ranged_attack(self, surface):
             animation_cooldown = 160
             # Refresh the image
             self.image = self.attack_animation_list[self.action][self.frame_index]
 
-            if self.character == "Gyamon":
-                # Increments the frame index
-                if (pygame.time.get_ticks() - self.update_time) > animation_cooldown:
-                    self.frame_index += 1
-                    self.update_time = pygame.time.get_ticks()
+            # Increments the frame index
+            if (pygame.time.get_ticks() - self.update_time) > animation_cooldown:
+                self.frame_index += 1
+                self.update_time = pygame.time.get_ticks()
 
-                # If the end of the animation is reached:
-                if self.frame_index >= len(self.attack_animation_list[self.action]):
-                    self.frame_index = len(self.attack_animation_list[self.action]) - 1
+            # If the end of the animation is reached:
+            if self.frame_index >= len(self.attack_animation_list[self.action]):
+                self.frame_index = len(self.attack_animation_list[self.action]) - 1
 
-                # Image movement
-                self.rect.x += 15 + (-30 * self.flip)
+            # Image movement
+            self.rect.x += 15 + (-30 * self.flip)
 
         def attack_collisions(self, target):
             if self.rect.colliderect(target.rect):
                 if self.collision == False:
                     self.collision = True
-                    target.hit = True
-                    target.health -= 5
+                    if not target.block:
+                        target.hit = True
+                        target.health -= 5
+                    else:
+                        target.shield_health -= 20
+
                     # Knock-back
                     if target.flip:
                         target.rect.x += 25

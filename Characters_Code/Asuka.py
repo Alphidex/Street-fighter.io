@@ -1,5 +1,5 @@
 import pygame
-from characters import Fighter, Ranged_Attack
+from characters import Fighter, Ranged_Attack, Create_Shield
 from debug import debug
 
 
@@ -20,16 +20,46 @@ class Asuka(Fighter):
 
         # Attacks
         self.attack_data = {
-            "normal_attack": {"trigger": False, "cooldown": 60, "frame_index": 1, "damage": 1,"knockback": 1, "action": 12, "range_attack": False, "rect": pygame.Rect(self.rect.centerx - (150 * self.flip), self.rect.y + 10, 140, 0.5 * self.rect.height)},
-            "normal_attack_up": {"trigger": False, "cooldown": 75, "frame_index": 3, "damage": 1,"knockback": 1, "action": 10, "range_attack": False, "rect": pygame.Rect(self.rect.centerx - 150, self.rect.y - 30, 300, 1.28 * self.rect.height)},
-            "normal_attack_down": {"trigger": False, "cooldown": 55, "frame_index": 3, "damage": 1,"knockback": 1, "action": 9, "range_attack": False, "rect": pygame.Rect(self.rect.centerx - (135 * self.flip), self.rect.y + 95, 135, 0.4 * self.rect.height)},
-            "normal_jump_attack": {"trigger": False, "cooldown": 85, "frame_index": 1, "damage": 1,"knockback": 1, "action": 6, "range_attack": True, "rect": None},
-            "strong_attack": {"trigger": False, "cooldown": 90, "frame_index": 3, "damage": 1,"knockback": 1, "action": 1, "range_attack": True, "rect": pygame.Rect(self.rect.centerx - (170 * self.flip), self.rect.y * 1.125, 175, 0.75 * self.rect.height)},
-            "strong_attack_up": {"trigger": False, "cooldown": 80, "frame_index": 2, "damage": 1,"knockback": 1, "action": 8, "range_attack": False, "rect": pygame.Rect(self.rect.centerx - 60 - (30 * self.flip), self.rect.y - 30, 150, 1.28 * self.rect.height)},
-            "strong_attack_down": {"trigger": False, "cooldown": 80, "frame_index": 7, "damage": 1,"knockback": 1, "action": 2, "range_attack": False, "rect": pygame.Rect(self.rect.centerx + 10 - (194 * self.flip), self.rect.y - 10, 174, self.rect.height)},
-            "strong_jump_attack": {"trigger": False, "cooldown": 80, "frame_index": 1, "damage": 1,"knockback": 1, "action": 6, "range_attack": True, "rect": None},
-            "special_attack": {"trigger": False, "cooldown": 100, "frame_index": 3, "damage": 1,"knockback": 1, "action": 0, "range_attack": True, "rect": pygame.Rect(self.rect.centerx - (170 * self.flip), self.rect.y - 20, 200, 0.87 * self.rect.height)}
+            "normal_attack": {"trigger": False, "cooldown": 60, "frame_index": 1, "damage": 1, "knockback": 1,
+                              "action": 12, "range_attack": False,
+                              "rect": pygame.Rect(self.rect.centerx - (150 * self.flip), self.rect.y + 10, 140,
+                                                  0.5 * self.rect.height)},
+            "normal_attack_up": {"trigger": False, "cooldown": 75, "frame_index": 3, "damage": 1, "knockback": 1,
+                                 "action": 10, "range_attack": False,
+                                 "rect": pygame.Rect(self.rect.centerx - 150, self.rect.y - 30, 300,
+                                                     1.28 * self.rect.height)},
+            "normal_attack_down": {"trigger": False, "cooldown": 55, "frame_index": 3, "damage": 1, "knockback": 1,
+                                   "action": 9, "range_attack": False,
+                                   "rect": pygame.Rect(self.rect.centerx - (135 * self.flip), self.rect.y + 95, 135,
+                                                       0.4 * self.rect.height)},
+            "normal_jump_attack": {"trigger": False, "cooldown": 85,"frame_index": 1, "damage": 1, "knockback": 1,
+                                   "action": 6, "range_attack": True,"rect": None},
+            "strong_attack": {"trigger": False, "cooldown": 90, "frame_index": 3, "damage": 1, "knockback": 1,
+                              "action": 1, "range_attack": True,
+                              "rect": pygame.Rect(self.rect.centerx - (170 * self.flip), self.rect.y * 1.125, 175,
+                                                  0.75 * self.rect.height)},
+            "strong_attack_up": {"trigger": False, "cooldown": 80, "frame_index": 2, "damage": 1, "knockback": 1,
+                                 "action": 8, "range_attack": False,
+                                 "rect": pygame.Rect(self.rect.centerx - 60 - (30 * self.flip), self.rect.y - 30, 150,
+                                                     1.28 * self.rect.height)},
+            "strong_attack_down": {"trigger": False, "cooldown": 80, "frame_index": 7, "damage": 1, "knockback": 1,
+                                   "action": 2, "range_attack": False,
+                                   "rect": pygame.Rect(self.rect.centerx + 10 - (194 * self.flip), self.rect.y - 10,
+                                                       174, self.rect.height)},
+            "strong_jump_attack": {"trigger": False, "cooldown": 80, "frame_index": 1, "damage": 1, "knockback": 1,
+                                   "action": 6, "range_attack": True, "rect": None},
+            "special_attack": {"trigger": False, "cooldown": 100, "frame_index": 3, "damage": 1, "knockback": 1,
+                               "action": 0, "range_attack": True,
+                               "rect": pygame.Rect(self.rect.centerx - (170 * self.flip), self.rect.y - 20, 200,
+                                                   0.87 * self.rect.height)}
         }
+
+        self.attack_delay_list = {
+            "normal_jump_attack": {"last_time_used": None, "delay": 3000},
+            "strong_jump_attack": {"last_time_used": None, "delay": 3000},
+            "strong_attack": {"last_time_used": None, "delay": 3000}
+        }
+        self.exclude_attacks = ["special_attack_up", "special_attack_down"]
 
     # Image Methods
     def load_images(self, sprite_sheet, animation_steps, choice):
@@ -78,42 +108,47 @@ class Asuka(Fighter):
     def update_attack_data(self):
         # Continuous declaration to update the values like Rect Position and Trigger Values
         self.attack_data = {
-            "normal_attack": {"trigger": False, "cooldown": 60, "frame_index": 1, "damage": 1,
-                              "knockback": 1, "action": 12, "range_attack": False,
+            "normal_attack": {"trigger": False, "cooldown": 60, "frame_index": 1, "damage": 1, "knockback": 1,
+                              "action": 12, "range_attack": False,
                               "rect": pygame.Rect(self.rect.centerx - (150 * self.flip), self.rect.y + 10, 140,
                                                   0.5 * self.rect.height)},
-            "normal_attack_up": {"trigger": False, "cooldown": 75, "frame_index": 3, "damage": 1,
-                                 "knockback": 1, "action": 10, "range_attack": False,
+            "normal_attack_up": {"trigger": False, "cooldown": 75, "frame_index": 3, "damage": 1, "knockback": 1,
+                                 "action": 10, "range_attack": False,
                                  "rect": pygame.Rect(self.rect.centerx - 150, self.rect.y - 30, 300,
                                                      1.28 * self.rect.height)},
-            "normal_attack_down": {"trigger": False, "cooldown": 55, "frame_index": 3, "damage": 1,
-                                   "knockback": 1, "action": 9, "range_attack": False,
+            "normal_attack_down": {"trigger": False, "cooldown": 55, "frame_index": 3, "damage": 1, "knockback": 1,
+                                   "action": 9, "range_attack": False,
                                    "rect": pygame.Rect(self.rect.centerx - (135 * self.flip), self.rect.y + 95, 135,
                                                        0.4 * self.rect.height)},
-            "normal_jump_attack": {"trigger": False, "cooldown": 85, "frame_index": 1, "damage": 1,
-                                   "knockback": 1, "action": 6, "range_attack": True, "rect": None},
-            "strong_attack": {"trigger": False, "cooldown": 90, "frame_index": 3, "damage": 1,
-                              "knockback": 1, "action": 1, "range_attack": True,
+            "normal_jump_attack": {"trigger": False, "cooldown": 85, "frame_index": 1, "damage": 1, "knockback": 1,
+                                   "action": 6, "range_attack": True, "rect": None},
+            "strong_attack": {"trigger": False, "cooldown": 90, "frame_index": 3, "damage": 1, "knockback": 1,
+                              "action": 1, "range_attack": True,
                               "rect": pygame.Rect(self.rect.centerx - (170 * self.flip), self.rect.y * 1.125, 175,
                                                   0.75 * self.rect.height)},
-            "strong_attack_up": {"trigger": False, "cooldown": 80, "frame_index": 2, "damage": 1,
-                                 "knockback": 1, "action": 8, "range_attack": False,
+            "strong_attack_up": {"trigger": False, "cooldown": 80, "frame_index": 2, "damage": 1, "knockback": 1,
+                                 "action": 8, "range_attack": False,
                                  "rect": pygame.Rect(self.rect.centerx - 60 - (30 * self.flip), self.rect.y - 30, 150,
                                                      1.28 * self.rect.height)},
-            "strong_attack_down": {"trigger": False, "cooldown": 80, "frame_index": 7, "damage": 1,
-                                   "knockback": 1, "action": 2, "range_attack": False,
+            "strong_attack_down": {"trigger": False, "cooldown": 80, "frame_index": 7, "damage": 1, "knockback": 1,
+                                   "action": 2, "range_attack": False,
                                    "rect": pygame.Rect(self.rect.centerx + 10 - (194 * self.flip), self.rect.y - 10,
                                                        174, self.rect.height)},
-            "strong_jump_attack": {"trigger": False, "cooldown": 80, "frame_index": 1, "damage": 1,
-                                   "knockback": 1, "action": 6, "range_attack": True, "rect": None},
-            "special_attack": {"trigger": False, "cooldown": 100, "frame_index": 3, "damage": 1,
-                               "knockback": 1, "action": 0, "range_attack": True,
+            "strong_jump_attack": {"trigger": False, "cooldown": 80, "frame_index": 1, "damage": 1, "knockback": 1,
+                                   "action": 6, "range_attack": True, "rect": None},
+            "special_attack": {"trigger": False, "cooldown": 100, "frame_index": 3, "damage": 1, "knockback": 1,
+                               "action": 0, "range_attack": True,
                                "rect": pygame.Rect(self.rect.centerx - (170 * self.flip), self.rect.y - 20, 200,
                                                    0.87 * self.rect.height)}
         }
+
         for key, value in self.attack_triggers.items():
             if key in self.attack_data.keys():
                 self.attack_data[key]["trigger"] = value["trigger"]
+
+        for attack in self.attack_data.values():
+            if attack["trigger"]:
+                self.attacking_rectangle = attack["rect"]
 
     def attacks_management(self, surface, target):
         # Range Attacks Management
@@ -136,13 +171,22 @@ class Asuka(Fighter):
                                                     + str(len(self.ranged_attack_instance_list)))
 
             self.ranged_attack_instance_list[len(self.ranged_attack_instance_list) - 1] = \
-                self.Ranged_Asuka(self.flip, self.projectile_list, action, self.rect, "Asuka")
+                self.Ranged_Asuka(self.flip, self.projectile_list, action, self.rect, "Asuka", self.opponent)
 
         def attack_effects():
             # Continuous knockback and effects
             if target.hit and not target.dead:
-                if self.attack_data["special_attack"]["trigger"]:
-                    target.rect.x += 2 + (-4 * self.flip)
+                pass
+            # Continuous Attack Movement
+            if self.attack_data["normal_attack_up"]["trigger"]:
+                self.rect.y -= 4.5
+                self.rect.x -= 3.5 - (7 * self.flip)
+                self.vel_y = 0
+            if self.attack_triggers["strong_attack_up"]["trigger"] and self.attack_effect_executions < 1:
+                if abs(self.opponent.rect.centerx - self.rect.centerx) <= 500:
+                    self.rect.centerx = self.opponent.rect.centerx + 60 - (120 * self.flip)
+                    self.flip = not self.flip
+                    self.attack_effect_executions += 1
 
         def attack_triggers():
             # The attacking rectangle will only activate at certain frame_indexes (with some having varying DPS):
@@ -154,6 +198,10 @@ class Asuka(Fighter):
                                 init_ranged_attack(attack["action"])
                             self.attack_rectangle_collision(surface, target)
                             self.attack_list_trigger[self.frame_index] = True
+
+                            # Attack Movement Per Frame:
+                            if self.attack_data["normal_attack"]["trigger"]:
+                                self.rect.x += 5 - (10 * self.flip)
 
         # Checks For Attacks
         if self.attacking:
@@ -167,20 +215,20 @@ class Asuka(Fighter):
         # HIT-BOXES
         self.update_attack_data()
 
-        for attack in self.attack_data.values():
-            if attack["trigger"]:
-                self.attacking_rectangle = attack["rect"]
-
         if self.attacking_rectangle is not None:
             # Rectangle collisions
             if self.attacking_rectangle.colliderect(target.rect):
-                target.hit = True
-                target.frame_index = 0
+                if not target.block:
+                    target.hit = True
+                    target.frame_index = 0
 
-                # Taking Damage
-                for attack in self.attack_data.values():
-                    if attack["trigger"]:
-                        target.health -= attack["damage"]
+                    # Taking Damage
+                    for attack in self.attack_data.values():
+                        if attack["trigger"]:
+                            target.health -= attack["damage"]
+
+                else:
+                    target.shield_health -= 20
 
                 # Knock-back - Once
                 if target.flip:
@@ -206,7 +254,7 @@ class Asuka(Fighter):
                 self.attack_triggers["strong_attack_down"]["trigger"] = True
                 self.rect.x += 80 - (160 * self.flip)
             elif self.normal_combo_count == 2:
-                if abs(self.opponent.rect.centerx - self.rect.centerx) <= 750:
+                if abs(self.opponent.rect.centerx - self.rect.centerx) <= 500:
                     self.rect.centerx = self.opponent.rect.centerx + 60 - (120 * self.flip)
                     self.flip = not self.flip
                 self.attack_triggers["strong_attack_up"]["trigger"] = True
@@ -274,6 +322,12 @@ class Asuka(Fighter):
                 if self.attacking:
                     # Updating attack list
                     self.attack_list_trigger = [False]
+                    self.attack_effect_executions = 0
+
+                    for key, value in self.attack_data.items():
+                        if key in self.attack_delay_list.keys():
+                            if value["trigger"]:
+                                self.attack_delay_list[key]["last_time_used"] = pygame.time.get_ticks()
 
                     self.attacking = False
                     for attack in self.attack_data.values():
@@ -340,10 +394,9 @@ class Asuka(Fighter):
     def time_passed(self):
         return pygame.time.get_ticks() - self.update_time
 
-
     class Ranged_Asuka(Ranged_Attack):
-        def __init__(self, flip, attack_animation_list, action, character_rect, character):
-            super().__init__(flip, attack_animation_list, action, character_rect, character)
+        def __init__(self, flip, attack_animation_list, action, character_rect, character, opponent):
+            super().__init__(flip, attack_animation_list, action, character_rect, character, opponent)
 
             # Create Rectangle
             self.rect = self.create_rectangle(character_rect)  # To check the position of the character
@@ -388,8 +441,10 @@ class Asuka(Fighter):
 
         def update_ranged_attack(self, surface):
             animation_cooldown = 160
+
             # Refresh the image
             self.image = self.attack_animation_list[self.action][self.frame_index]
+
             # Increments the frame index
             if (pygame.time.get_ticks() - self.update_time) > animation_cooldown:
                 self.frame_index += 1
@@ -421,10 +476,14 @@ class Asuka(Fighter):
 
         def attack_collisions(self, target):
             if self.rect.colliderect(target.rect):
-                if self.collision == False:
+                if not self.collision:
                     self.collision = True
-                    target.hit = True
-                    target.health -= 5
+                    if not target.block:
+                        target.hit = True
+                        target.health -= 5
+                    else:
+                        target.shield_health -= 20
+
                     # Knock-back
                     if target.flip:
                         target.rect.x += 25

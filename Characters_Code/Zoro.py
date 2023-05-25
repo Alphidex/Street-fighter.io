@@ -14,30 +14,7 @@ class Zoro(Fighter):
         self.projectile_list = self.load_images(sprite_sheet, animation_steps, "projectiles")
         self.image = self.animation_list[self.action][self.frame_index]
         # Attack
-        self.attack_data = {
-            "normal_attack": {"trigger": False, "cooldown":60, "frame_index":1, "damage": 1, "knockback": 1, "action":18, "range_attack":False, "rect":pygame.Rect(self.rect.centerx - (1.7 * self.rect.width * self.flip),
-                                              self.rect.y * 1.125, 1.75 * self.rect.width, 0.75 * self.rect.height)},
-            "normal_attack_up": {"trigger": False, "cooldown":60, "frame_index":2, "damage": 1, "knockback": 1, "action":15, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - (1.2 * self.rect.width * self.flip),
-                                              self.rect.y, 1.2 * self.rect.width, 1.2 * self.rect.height)},
-            "normal_attack_down": {"trigger": False, "cooldown":55, "frame_index":3, "damage": 1, "knockback": 1, "action":9, "range_attack":False, "rect":pygame.Rect(self.rect.centerx - (1.4 * self.rect.width * self.flip),
-                                              self.rect.y * 1.125, 1.4 * self.rect.width, 0.75 * self.rect.height)},
-            "normal_jump_attack": {"trigger": False, "cooldown":85, "frame_index":3, "damage": 1, "knockback": 1, "action":13, "range_attack":False, "rect":pygame.Rect(self.rect.centerx - 25 - (0.9 * self.rect.width * self.flip),
-                                                   self.rect.y + 20, 1.60 * self.rect.width, 1.14 * self.rect.height)},
-            "strong_attack": {"trigger": False, "cooldown":90, "frame_index":2<=self.frame_index<=11, "damage": 1, "knockback": 1, "action":1, "range_attack": True, "rect":pygame.Rect(self.rect.centerx - 10 - (1.75 * self.rect.width * self.flip),
-                                              self.rect.y * 1.125, 1.85 * self.rect.width, 0.75 * self.rect.height)},
-            "strong_attack_up": {"trigger": False, "cooldown":90, "frame_index":1<=self.frame_index<=5, "damage": 1, "knockback": 1, "action":14, "range_attack":False, "rect":pygame.Rect(self.rect.x - 30 - (10 * self.flip),
-                                              self.rect.y - 90, 1.8 * self.rect.width, 1.65 * self.rect.height)},
-            "strong_attack_down": {"trigger": False, "cooldown":90, "frame_index":3, "damage": 1, "knockback": 1, "action":4, "range_attack":False, "rect":pygame.Rect(self.rect.centerx - (1.3 * self.rect.width * self.flip),
-                                              self.rect.y * 0.97, 1.4 * self.rect.width, 1.2 * self.rect.height)},
-            "strong_jump_attack": {"trigger": False, "cooldown":70, "frame_index":3, "damage": 1, "knockback": 1, "action":7, "range_attack":False, "rect":pygame.Rect(self.rect.centerx - 90 - (53 * self.flip),
-                                                   self.rect.y + 28, 2.3 * self.rect.width, 1.1 * self.rect.height)},
-            "special_attack": {"trigger": False, "cooldown":100, "frame_index":3<=self.frame_index<=11, "damage": 1, "knockback": 1, "action":5, "range_attack": True, "rect":pygame.Rect(self.rect.centerx - (2 * self.rect.width * self.flip),
-                                              self.rect.y * 1.115, 2 * self.rect.width, 0.87 * self.rect.height)},
-            "special_attack_up": {"trigger": False, "cooldown":100, "frame_index":4, "damage": 1, "knockback": 1, "action":0, "range_attack":False, "rect":pygame.Rect(self.rect.x - 63 - (20 * self.flip),
-                                              self.rect.y - 43, 2.4 * self.rect.width, 1.45 * self.rect.height)},
-            "special_attack_down": {"trigger": False, "cooldown":100, "frame_index":3, "damage": 1, "knockback": 1, "action":8, "range_attack":False, "rect":pygame.Rect(self.rect.centerx - (1.7 * self.rect.width * self.flip),
-                                              self.rect.y, 1.83 * self.rect.width, 1.15 * self.rect.height)}
-        }
+        self.attack_data = self.get_attack_data()
 
     # Image Methods
     def load_images(self, sprite_sheet, animation_steps, choice):
@@ -71,7 +48,6 @@ class Zoro(Fighter):
                     temp_animation_img_list.append(scaled_image)
 
             animation_list.append(temp_animation_img_list)
-            #Will create many empty lists (inefficient but acceptable)
             projectile_list.append(temp_projectile_img_list)
 
         if choice == "animations":
@@ -84,95 +60,95 @@ class Zoro(Fighter):
         if self.action == 14:
             surface.blit(img, (
                 self.rect.x - ((self.offset[0] + 6) * self.image_scale),
-                self.rect.y - ((self.offset[1] + 25) * self.image_scale)))
+                self.rect.y - ((self.offset[1] + 40) * self.image_scale)))
         else:
             if not self.flip:
                 surface.blit(img, (
                     self.rect.x - (self.offset[0] * self.image_scale),
-                    self.rect.y - (self.offset[1] * self.image_scale)))
+                    self.rect.y - ((self.offset[1] + 14) * self.image_scale)))
             else:
                 surface.blit(img, (
                     self.rect.x - (self.offset[0] * self.image_scale * 1.3),
-                    self.rect.y - (self.offset[1] * self.image_scale)))
+                    self.rect.y - ((self.offset[1] + 14) * self.image_scale)))
 
     # Attack Methods
-    def update_attack_data(self):
-        # Continuous declaration to update the values like Rect Position and Trigger Values
-        self.attack_data = {
+    def get_attack_data(self):
+        data = {
             "normal_attack": {"trigger": False, "cooldown": 60, "frame_index": 1, "damage": 1, "knockback": 1,
                               "action": 18, "range_attack": False,
-                              "rect": pygame.Rect(self.rect.centerx - (1.7 * self.rect.width * self.flip),
-                                                  self.rect.y * 1.125, 1.75 * self.rect.width,
-                                                  0.75 * self.rect.height)},
+                              "rect": pygame.Rect(self.rect.centerx - (175 * self.flip),
+                                                  self.rect.y + 20, 175, 110)},
             "normal_attack_up": {"trigger": False, "cooldown": 60, "frame_index": 2, "damage": 1, "knockback": 1,
                                  "action": 15, "range_attack": False,
-                                 "rect": pygame.Rect(self.rect.centerx - (1.2 * self.rect.width * self.flip),
-                                                     self.rect.y, 1.2 * self.rect.width, 1.2 * self.rect.height)},
+                                 "rect": pygame.Rect(self.rect.centerx - (120 * self.flip),
+                                                     self.rect.y, 120, 170)},
             "normal_attack_down": {"trigger": False, "cooldown": 55, "frame_index": 3, "damage": 1, "knockback": 1,
                                    "action": 9, "range_attack": False,
-                                   "rect": pygame.Rect(self.rect.centerx - (1.4 * self.rect.width * self.flip),
-                                                       self.rect.y * 1.125, 1.4 * self.rect.width,
-                                                       0.75 * self.rect.height)},
+                                   "rect": pygame.Rect(self.rect.centerx - (140 * self.flip),
+                                                       self.rect.y + 20, 140, 110)},
             "normal_jump_attack": {"trigger": False, "cooldown": 85, "frame_index": 3, "damage": 1, "knockback": 1,
                                    "action": 13, "range_attack": False,
-                                   "rect": pygame.Rect(self.rect.centerx - 25 - (0.9 * self.rect.width * self.flip),
-                                                       self.rect.y + 20, 1.60 * self.rect.width,
-                                                       1.14 * self.rect.height)},
+                                   "rect": pygame.Rect(self.rect.centerx - 25 - (110 * self.flip),
+                                                       self.rect.y + 20, 160, 160)},
+
             "strong_attack": {"trigger": False, "cooldown": 90, "frame_index": 2 <= self.frame_index <= 11, "damage": 1,
-                              "knockback": 1, "action": 1, "range_attack": True,
-                              "rect": pygame.Rect(self.rect.centerx - 10 - (1.75 * self.rect.width * self.flip),
-                                                  self.rect.y * 1.125, 1.85 * self.rect.width,
-                                                  0.75 * self.rect.height)},
+                              "knockback": 1, "action": 1, "range_attack": False,
+                              "rect": pygame.Rect(self.rect.centerx - 10 - (165 * self.flip),
+                                                  self.rect.y + 20, 185, 110)},
             "strong_attack_up": {"trigger": False, "cooldown": 90, "frame_index": 1 <= self.frame_index <= 5,
                                  "damage": 1, "knockback": 1, "action": 14, "range_attack": False,
-                                 "rect": pygame.Rect(self.rect.x - 30 - (10 * self.flip),
-                                                     self.rect.y - 90, 1.8 * self.rect.width, 1.65 * self.rect.height)},
+                                 "rect": pygame.Rect(self.rect.x - 30 - (120 * self.flip),
+                                                     self.rect.y - 90, 180, 230)},
             "strong_attack_down": {"trigger": False, "cooldown": 90, "frame_index": 3, "damage": 1, "knockback": 1,
-                                   "action": 4, "range_attack": False,
-                                   "rect": pygame.Rect(self.rect.centerx - (1.3 * self.rect.width * self.flip),
-                                                       self.rect.y * 0.97, 1.4 * self.rect.width,
-                                                       1.2 * self.rect.height)},
+                                   "action": 4, "range_attack": True,
+                                   "rect": pygame.Rect(self.rect.centerx - (140 * self.flip),
+                                                       self.rect.y + 10, 140, 170)},
             "strong_jump_attack": {"trigger": False, "cooldown": 70, "frame_index": 3, "damage": 1, "knockback": 1,
                                    "action": 7, "range_attack": False,
-                                   "rect": pygame.Rect(self.rect.centerx - 90 - (53 * self.flip),
-                                                       self.rect.y + 28, 2.3 * self.rect.width,
-                                                       1.1 * self.rect.height)},
+                                   "rect": pygame.Rect(self.rect.centerx - 90 - (50 * self.flip),
+                                                       self.rect.y + 30, 230, 150)},
+
             "special_attack": {"trigger": False, "cooldown": 100, "frame_index": 3 <= self.frame_index <= 11,
-                               "damage": 1, "knockback": 1, "action": 5, "range_attack": True,
-                               "rect": pygame.Rect(self.rect.centerx - (2 * self.rect.width * self.flip),
-                                                   self.rect.y * 1.115, 2 * self.rect.width, 0.87 * self.rect.height)},
+                               "damage": 1, "knockback": 1, "action": 5, "range_attack": False,
+                               "rect": pygame.Rect(self.rect.centerx - (200 * self.flip),
+                                                   self.rect.y + 20, 200, 120)},
             "special_attack_up": {"trigger": False, "cooldown": 100, "frame_index": 4, "damage": 1, "knockback": 1,
                                   "action": 0, "range_attack": False,
-                                  "rect": pygame.Rect(self.rect.x - 63 - (20 * self.flip),
-                                                      self.rect.y - 43, 2.4 * self.rect.width,
-                                                      1.45 * self.rect.height)},
+                                  "rect": pygame.Rect(self.rect.x - 65 - (110 * self.flip),
+                                                      self.rect.y - 45, 240, 200)},
             "special_attack_down": {"trigger": False, "cooldown": 100, "frame_index": 3, "damage": 1, "knockback": 1,
-                                    "action": 8, "range_attack": False,
-                                    "rect": pygame.Rect(self.rect.centerx - (1.7 * self.rect.width * self.flip),
-                                                        self.rect.y, 1.83 * self.rect.width, 1.15 * self.rect.height)}
+                                    "action": 8, "range_attack": True,
+                                    "rect": pygame.Rect(self.rect.centerx - (185 * self.flip),
+                                                        self.rect.y, 185, 160)}
         }
+        return data
+
+    def update_attack_data(self):
+        # Continuous declaration to update the values like Rect Position and Trigger Values
+        self.attack_data = self.get_attack_data()
         for key, value in self.attack_triggers.items():
             if key in self.attack_data.keys():
                 self.attack_data[key]["trigger"] = value["trigger"]
-
-    def attack_rectangle_collision(self, surface, target):
-        # HIT-BOXES
-        self.update_attack_data()
 
         for attack in self.attack_data.values():
             if attack["trigger"]:
                 self.attacking_rectangle = attack["rect"]
 
+    def attack_rectangle_collision(self, surface, target):
+        # HIT-BOXES
+        self.update_attack_data()
+
         if self.attacking_rectangle is not None:
             # Rectangle collisions
             if self.attacking_rectangle.colliderect(target.rect):
-                target.hit = True
-                target.frame_index = 0
+                if not target.block:
+                    target.hit = True
+                    target.frame_index = 0
 
-                # Taking Damage
-                for attack in self.attack_data.values():
-                    if attack["trigger"]:
-                        target.health -= attack["damage"]
+                    # Taking Damage
+                    for attack in self.attack_data.values():
+                        if attack["trigger"]:
+                            target.health -= attack["damage"]
 
                 # Knock-back - Once
                 if target.flip:
@@ -201,13 +177,41 @@ class Zoro(Fighter):
             self.ranged_attack_instance_list.append("ranged_attack_instance_"
                                                     + str(len(self.ranged_attack_instance_list)))
             self.ranged_attack_instance_list[len(self.ranged_attack_instance_list) - 1] = \
-                self.Ranged_Zoro(self.flip, self.projectile_list, action, self.rect, "Zoro")
+                self.Ranged_Zoro(self.flip, self.projectile_list, action, self.rect, "Zoro", self.opponent)
 
         def attack_effects():
             # Continuous knockback and effects
             if target.hit and not target.dead:
                 if self.attack_data["special_attack"]["trigger"]:
                     target.rect.x += 2 + (-4 * self.flip)
+
+            if self.attack_data["normal_attack"]["trigger"]:
+                if 1 <= self.frame_index <= 2:
+                    self.rect.x += 5 - (10 * self.flip)
+
+            if self.attack_data["normal_attack_down"]["trigger"]:
+                if 4 <= self.frame_index <= 5:
+                    self.rect.x += 7 - (14 * self.flip)
+
+            if self.attack_data["normal_jump_attack"]["trigger"]:
+                if self.frame_index >= 2:
+                    self.rect.x += 7 - (14 * self.flip)
+                    self.rect.y += 9
+
+            if self.attack_data["normal_attack_up"]["trigger"]:
+                self.rect.x += 7 - (14 * self.flip)
+                self.rect.y -= 7
+                self.vel_y = 0
+
+            # Strong
+            if self.attack_data["strong_attack"]["trigger"]:
+                self.rect.x += 8 - (16 * self.flip)
+
+            # Special
+            if self.attack_data["special_attack"]["trigger"]:
+                if 3 <= self.frame_index <= 6:
+                    self.rect.x += 8 - (16 * self.flip)
+
 
         def attack_triggers():
             # The attacking rectangle will only activate at certain frame_indexes (with some having varying DPS):
@@ -258,6 +262,9 @@ class Zoro(Fighter):
 
         # Update Image ------------------------------------------
         self.image = self.animation_list[self.action][self.frame_index]
+
+        if self.attacking_rectangle != None:
+            pygame.draw.rect(self.screen, (255,0,25), self.attacking_rectangle, 1)
 
         # Update the animation frame index at certain milliseconds
         self.update_animation(target)
@@ -352,72 +359,61 @@ class Zoro(Fighter):
         return pygame.time.get_ticks() - self.update_time
 
     class Ranged_Zoro(Ranged_Attack):
-        def __init__(self, flip, attack_animation_list, action, character_rect, character):
-            super().__init__(flip, attack_animation_list, action, character_rect, character)
+        def __init__(self, flip, attack_animation_list, action, character_rect, character, opponent):
+            super().__init__(flip, attack_animation_list, action, character_rect, character, opponent)
 
             # Create Rectangle
             self.rect = self.create_rectangle(character_rect)  # To check the position of the character
 
         def create_rectangle(self, character_rect):
-            if self.character == "Zoro":
-                # Strong Attack
-                if self.action == 4:
-                    rect = pygame.Rect(character_rect.centerx - (1.7 * character_rect.width * self.flip),
-                                                                  character_rect.y + 50, 1.83 * character_rect.width,
-                                                                  0.5 * character_rect.height)
-                # Special Attack
-                elif self.action == 8:
-                    rect = pygame.Rect(character_rect.centerx - (1.7 * character_rect.width * self.flip),
-                                       character_rect.y + 30, 1.9 * character_rect.width,
-                                       0.7 * character_rect.height)
+            #  Strong Attack
+            if self.action == 4:
+                rect = pygame.Rect(character_rect.centerx - (1.7 * character_rect.width * self.flip),
+                                                              character_rect.y + 50, 1.83 * character_rect.width,
+                                                              0.5 * character_rect.height)
+            # Special Attack
+            elif self.action == 8:
+                rect = pygame.Rect(character_rect.centerx - (1.7 * character_rect.width * self.flip),
+                                   character_rect.y + 30, 1.9 * character_rect.width,
+                                   0.7 * character_rect.height)
 
             return rect
 
         def draw_ranged_attack(self, surface, offset, image_scale):
             # Drawing Ranged Attacks
             img = pygame.transform.flip(self.image, self.flip, False)
-
-            if self.character == "Zoro":
-                if self.action == 4:
-                    surface.blit(img, (
-                        self.rect.x - (offset[0] * image_scale),
-                        self.rect.y - 70 - (offset[1] * image_scale)))
-                    pygame.draw.rect(surface, (143, 24, 199), self.rect, 4)
-                elif self.action == 8:
-                    surface.blit(img, (
-                        self.rect.x - (offset[0] * image_scale),
-                        self.rect.y - 50 - (offset[1] * image_scale)))
-                    pygame.draw.rect(surface, (143, 24, 199), self.rect, 4)
-                else:
-                    surface.blit(img, (
-                        self.rect.x - (offset[0] * image_scale),
-                        self.rect.y - (offset[1] * image_scale)))
-                    pygame.draw.rect(surface, (143, 24, 199), self.rect, 4)
-
+            if self.action == 4:
+                surface.blit(img, (
+                    self.rect.x - (offset[0] * image_scale),
+                    self.rect.y - 70 - (offset[1] * image_scale)))
+                pygame.draw.rect(surface, (143, 24, 199), self.rect, 4)
+            elif self.action == 8:
+                surface.blit(img, (
+                    self.rect.x - (offset[0] * image_scale),
+                    self.rect.y - 50 - (offset[1] * image_scale)))
+                pygame.draw.rect(surface, (143, 24, 199), self.rect, 4)
             else:
                 surface.blit(img, (
                     self.rect.x - (offset[0] * image_scale),
                     self.rect.y - (offset[1] * image_scale)))
                 pygame.draw.rect(surface, (143, 24, 199), self.rect, 4)
 
-
         def update_ranged_attack(self, surface):
             animation_cooldown = 160
             # Refresh the image
             self.image = self.attack_animation_list[self.action][self.frame_index]
 
-            if self.character == "Zoro":
-                # Increments the frame index
-                if (pygame.time.get_ticks() - self.update_time) > animation_cooldown:
-                    self.frame_index += 1
-                    self.update_time = pygame.time.get_ticks()
+            # Increments the frame index
+            if (pygame.time.get_ticks() - self.update_time) > animation_cooldown:
+                self.frame_index += 1
+                self.update_time = pygame.time.get_ticks()
 
-                # If the end of the animation is reached:
-                if self.frame_index >= len(self.attack_animation_list[self.action]):
-                    self.frame_index = 0
+            # If the end of the animation is reached:
+            if self.frame_index >= len(self.attack_animation_list[self.action]):
+                self.frame_index = 0
 
-                # Image movement
-                self.rect.x += 15 + (-30 * self.flip)
+            # Image movement
+            self.rect.x += 15 + (-30 * self.flip)
 
             if self.rect.left >= 1280 or self.rect.right <= 0:
                 self.attacking = False
@@ -426,8 +422,12 @@ class Zoro(Fighter):
             if self.rect.colliderect(target.rect):
                 if self.collision == False:
                     self.collision = True
-                    target.hit = True
-                    target.health -= 5
+                    if not target.block:
+                        target.hit = True
+                        target.health -= 5
+                    else:
+                        target.shield_health -= 20
+
                     # Knock-back
                     if target.flip:
                         target.rect.x += 25

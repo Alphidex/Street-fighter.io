@@ -16,24 +16,7 @@ class Sanji(Fighter):
         self.projectile_list = self.load_images(sprite_sheet, animation_steps, "projectiles")
         self.image = self.animation_list[self.action][self.frame_index]
         # Attacks
-        self.attack_data = {
-            "normal_attack": {"trigger": False, "cooldown":80, "frame_index":2, "damage": 1, "knockback": 1, "action":15, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - 75 + (10 * self.flip),self.rect.y - 20, 140, 1.2 * self.rect.height)},
-            "normal_attack_up": {"trigger": False, "cooldown":75, "frame_index":3, "damage": 1, "knockback": 1, "action":14, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - 50 - (50 * self.flip),self.rect.y - 30, 110, 0.8 * self.rect.height)},
-            "normal_attack_down": {"trigger": False, "cooldown":55, "frame_index":2<=self.frame_index<=5, "damage": 1, "knockback": 1, "action":13, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - 70,self.rect.y + 20, 130, 140)},
-            "normal_jump_attack": {"trigger": False, "cooldown":85, "frame_index":1<=self.frame_index<=4, "damage": 1, "knockback": 1, "action":10, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - 40 - (30 * self.flip),self.rect.y - 10, 130, self.rect.height + 30)},
-            "normal_attack_forward": {"trigger": False, "cooldown":70, "frame_index":3, "damage": 1, "knockback": 1, "action":11, "range_attack":False, "rect":pygame.Rect(self.rect.centerx - (1.35 * self.rect.width * self.flip),self.rect.y - 30, 1.35 * self.rect.width, 0.4 * self.rect.height)},
-
-            "strong_attack": {"trigger": False, "cooldown":90, "frame_index":3<=self.frame_index<=8, "damage": 1, "knockback": 1, "action":6, "range_attack":False, "rect":pygame.Rect(self.rect.centerx - 100 - (10 * self.flip),self.rect.y - 20, 230, 0.4 * self.rect.height)},
-            "strong_attack_up": {"trigger": False, "cooldown":100, "frame_index":3<=self.frame_index<=4, "damage": 1, "knockback": 1, "action":12, "range_attack":False, "rect":pygame.Rect(self.rect.centerx - 18,self.rect.y - 20, 110, 138)},
-            "strong_attack_down": {"trigger": False, "cooldown":90, "frame_index":1<=self.frame_index<=8, "damage": 1, "knockback": 1, "action":7, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - 90,self.rect.y + 10, 170, 100)},
-            "strong_jump_attack": {"trigger": False, "cooldown":70, "frame_index":1<=self.frame_index<=4, "damage": 1, "knockback": 1, "action":16, "range_attack":False, "rect": pygame.Rect(self.rect.x - (130 * self.flip),self.rect.y, 130, 1.1 * self.rect.height)},
-
-            "special_attack": {"trigger": False, "cooldown":110, "frame_index":3<=self.frame_index<=24, "damage": 1, "knockback": 1, "action":1, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - 75 + (10 * self.flip),self.rect.y - 20, 155, 1.2 * self.rect.height)},
-            "special_attack_up": {"trigger": False, "cooldown":110, "frame_index":6<=self.frame_index<=14, "damage": 1, "knockback": 1, "action":2, "range_attack":False, "rect":pygame.Rect(self.rect.centerx - 80 - (20 * self.flip),
-                                                   self.rect.y - 110, 180, 110 + self.rect.height)},
-            "special_attack_down": {"trigger": False, "cooldown":110, "frame_index":3<=self.frame_index<=41, "damage": 1, "knockback": 1, "action":0, "range_attack":False, "rect":pygame.Rect(self.rect.centerx - 70 - (20 * self.flip),
-                                                   self.rect.y - 20, 160, 1.2 * self.rect.height)}
-        }
+        self.attack_data = self.get_attack_data()
 
     #  Image Methods
     def load_images(self, sprite_sheet, animation_steps, choice):
@@ -77,23 +60,22 @@ class Sanji(Fighter):
         pygame.draw.rect(surface, (255, 0, 0), self.rect, 4)
 
     # Attack Methods
-    def update_attack_data(self):
-        # Continuous declaration to update the values like Rect Position and Trigger Values
-        self.attack_data = {
+    def get_attack_data(self):
+        data = {
             "normal_attack": {"trigger": False, "cooldown": 80, "frame_index": 2, "damage": 1, "knockback": 1,
                               "action": 15, "range_attack": False,
                               "rect": pygame.Rect(self.rect.centerx - 75 + (10 * self.flip), self.rect.y - 20, 140,
                                                   1.2 * self.rect.height)},
             "normal_attack_up": {"trigger": False, "cooldown": 75, "frame_index": 3, "damage": 1, "knockback": 1,
                                  "action": 14, "range_attack": False,
-                                 "rect": pygame.Rect(self.rect.centerx - 50 - (50 * self.flip), self.rect.y - 30, 110,
+                                 "rect": pygame.Rect(self.rect.centerx - 50 - (10 * self.flip), self.rect.y - 30, 110,
                                                      0.8 * self.rect.height)},
             "normal_attack_down": {"trigger": False, "cooldown": 55, "frame_index": 2 <= self.frame_index <= 5,
                                    "damage": 1, "knockback": 1, "action": 13, "range_attack": False,
-                                   "rect": pygame.Rect(self.rect.centerx - 70, self.rect.y + 20, 130, 140)},
+                                   "rect": pygame.Rect(self.rect.centerx - 70 + (10 * self.flip), self.rect.y + 20, 130, 140)},
             "normal_jump_attack": {"trigger": False, "cooldown": 85, "frame_index": 1 <= self.frame_index <= 4,
                                    "damage": 1, "knockback": 1, "action": 10, "range_attack": False,
-                                   "rect": pygame.Rect(self.rect.centerx - 40 - (30 * self.flip), self.rect.y - 10, 130,
+                                   "rect": pygame.Rect(self.rect.centerx - 40 - (50 * self.flip), self.rect.y - 10, 130,
                                                        self.rect.height + 30)},
             "normal_attack_forward": {"trigger": False, "cooldown": 70, "frame_index": 3, "damage": 1, "knockback": 1,
                                       "action": 11, "range_attack": False,
@@ -103,23 +85,23 @@ class Sanji(Fighter):
 
             "strong_attack": {"trigger": False, "cooldown": 90, "frame_index": 3 <= self.frame_index <= 8, "damage": 1,
                               "knockback": 1, "action": 6, "range_attack": False,
-                              "rect": pygame.Rect(self.rect.centerx - 100 - (10 * self.flip), self.rect.y - 20, 230,
-                                                  0.4 * self.rect.height)},
+                              "rect": pygame.Rect(self.rect.centerx - 100 - (30 * self.flip), self.rect.y - 20, 230,
+                                                  -40 + self.rect.height)},
             "strong_attack_up": {"trigger": False, "cooldown": 100, "frame_index": 3 <= self.frame_index <= 4,
                                  "damage": 1, "knockback": 1, "action": 12, "range_attack": False,
-                                 "rect": pygame.Rect(self.rect.centerx - 18, self.rect.y - 20, 110, 138)},
+                                 "rect": pygame.Rect(self.rect.centerx - 18 - (74 * self.flip), self.rect.y - 20, 110, 138)},
             "strong_attack_down": {"trigger": False, "cooldown": 90, "frame_index": 1 <= self.frame_index <= 8,
                                    "damage": 1, "knockback": 1, "action": 7, "range_attack": False,
-                                   "rect": pygame.Rect(self.rect.centerx - 90, self.rect.y + 10, 170, 100)},
+                                   "rect": pygame.Rect(self.rect.centerx - 100 + (20 * self.flip), self.rect.y + 10, 180, 100)},
             "strong_jump_attack": {"trigger": False, "cooldown": 70, "frame_index": 1 <= self.frame_index <= 4,
                                    "damage": 1, "knockback": 1, "action": 16, "range_attack": False,
-                                   "rect": pygame.Rect(self.rect.x - (130 * self.flip), self.rect.y, 130,
-                                                       1.1 * self.rect.height)},
+                                   "rect": pygame.Rect(self.rect.x - (30 * self.flip), self.rect.y, 130,
+                                                       20 + self.rect.height)},
 
             "special_attack": {"trigger": False, "cooldown": 110, "frame_index": 3 <= self.frame_index <= 24,
                                "damage": 1, "knockback": 1, "action": 1, "range_attack": False,
-                               "rect": pygame.Rect(self.rect.centerx - 75 + (10 * self.flip), self.rect.y - 20, 155,
-                                                   1.2 * self.rect.height)},
+                               "rect": pygame.Rect(self.rect.centerx - 75 - (5 * self.flip), self.rect.y - 20, 155,
+                                                   30 + self.rect.height)},
             "special_attack_up": {"trigger": False, "cooldown": 110, "frame_index": 6 <= self.frame_index <= 14,
                                   "damage": 1, "knockback": 1, "action": 2, "range_attack": False,
                                   "rect": pygame.Rect(self.rect.centerx - 80 - (20 * self.flip),
@@ -127,32 +109,40 @@ class Sanji(Fighter):
             "special_attack_down": {"trigger": False, "cooldown": 110, "frame_index": 3 <= self.frame_index <= 41,
                                     "damage": 1, "knockback": 1, "action": 0, "range_attack": False,
                                     "rect": pygame.Rect(self.rect.centerx - 70 - (20 * self.flip),
-                                                        self.rect.y - 20, 160, 1.2 * self.rect.height)}
+                                                        self.rect.y - 20, 160, 30 + self.rect.height)}
         }
+        return data
+
+    def update_attack_data(self):
+        # Continuous declaration to update the values like Rect Position and Trigger Values
+        self.attack_data = self.get_attack_data()
 
         for key, value in self.attack_triggers.items():
             if key in self.attack_data.keys():
                 self.attack_data[key]["trigger"] = value["trigger"]
 
-    def attack_rectangle_collision(self, surface, target):
-        # HIT-BOXES
-        self.update_attack_data()
-
         for attack in self.attack_data.values():
             if attack["trigger"]:
                 self.attacking_rectangle = attack["rect"]
 
+    def attack_rectangle_collision(self, surface, target):
+        # HIT-BOXES
+        self.update_attack_data()
+
         if self.attacking_rectangle is not None:
             # Rectangle collisions
             if self.attacking_rectangle.colliderect(target.rect):
-                target.hit = True
-                target.frame_index = 0
+                if not target.block:
+                    target.hit = True
+                    target.frame_index = 0
 
-                # Taking Damage
-                for attack in self.attack_data.values():
-                    if attack["trigger"]:
-                        target.health -= attack["damage"]
+                    # Taking Damage
+                    for attack in self.attack_data.values():
+                        if attack["trigger"]:
+                            target.health -= attack["damage"]
 
+                else:
+                    target.shield_health -= 20
                 # Knock-back - Once
                 if target.flip:
                     target.rect.x += 25
@@ -162,32 +152,137 @@ class Sanji(Fighter):
                     self.rect.x -= 10
 
     def attacks_management(self, surface, target):
-        # if self.range_attack:
-        #     for instance in self.ranged_attack_instance_list:
-        #         instance.main(surface, self.offset, self.image_scale, target)
-        #
-        #         # Remove the instance variable from both the list and the Class (Ranged Attacks)
-        #         if not instance.attacking:
-        #             self.ranged_attack_instance_list.remove(instance)
-        #             del instance
-        #
-        #     if len(self.ranged_attack_instance_list) == 0:
-        #         self.range_attack = False
-        #
-        # def init_ranged_attack(action):
-        #     # Initialise the range attack
-        #     self.range_attack = True
-        #     self.ranged_attack_instance_list.append("ranged_attack_instance_"
-        #                                             + str(len(self.ranged_attack_instance_list)))
-        #
-        #     self.ranged_attack_instance_list[len(self.ranged_attack_instance_list) - 1] = \
-        #         self.Ranged_Attack(self.flip, self.projectile_list, action, self.rect, "Sanji")
+        if self.range_attack:
+            for instance in self.ranged_attack_instance_list:
+                instance.main(surface, self.offset, self.image_scale, target)
+
+                # Remove the instance variable from both the list and the Class (Ranged Attacks)
+                if not instance.attacking:
+                    self.ranged_attack_instance_list.remove(instance)
+                    del instance
+
+            if len(self.ranged_attack_instance_list) == 0:
+                self.range_attack = False
+
+        def init_ranged_attack(action):
+            # Initialise the range attack
+            self.range_attack = True
+            self.ranged_attack_instance_list.append("ranged_attack_instance_"
+                                                    + str(len(self.ranged_attack_instance_list)))
+
+            self.ranged_attack_instance_list[len(self.ranged_attack_instance_list) - 1] = \
+                self.Ranged_Sanji(self.flip, self.projectile_list, action, self.rect, "Sanji", self.opponent)
 
         def attack_effects():
             # Continuous knockback and effects
             if target.hit and not target.dead:
                 if self.attack_data["special_attack"]["trigger"]:
                     target.rect.x += 2 + (-4 * self.flip)
+
+            # Normal
+            if self.attack_data["normal_attack"]["trigger"]:
+                if 1<=self.frame_index<=4:
+                    self.rect.x += 2 - (4 * self.flip)
+
+            if self.attack_data["normal_attack_down"]["trigger"]:
+                if self.frame_index == 1:
+                    self.position_checkpoint = self.rect.centerx
+                    self.attack_effect_executions = 0
+
+                if self.frame_index >= 2:
+                    if self.attack_effect_executions == 0:
+                        if abs(self.rect.centerx - self.position_checkpoint) < 100:
+                            self.rect.x += 4 - (8 * self.flip)
+                        else:
+                            self.position_checkpoint = self.rect.centerx
+                            self.attack_effect_executions = 1
+
+                    if self.attack_effect_executions == 1:
+                        if abs(self.rect.centerx - self.position_checkpoint) < 200:
+                            self.rect.x -= 4 - (8 * self.flip)
+                        else:
+                            self.attack_effect_executions = 2
+
+                        # In case it collides with wall to prevent infinite loop
+                        if self.rect.left <= 0 or self.rect.right >= self.screen.get_width():
+                            self.attack_effect_executions = 2
+
+                    if self.attack_effect_executions < 2:
+                        # Repeat animation
+                        if self.frame_index > 5:
+                            self.frame_index = 2
+
+            if self.attack_data["normal_jump_attack"]["trigger"]:
+                if self.frame_index <= 6:
+                    self.rect.x += 4 - (8 * self.flip)
+                    self.rect.y += 6
+
+
+            # Strong
+            if self.attack_data["strong_attack"]["trigger"]:
+                if self.frame_index == 3:
+                    self.position_checkpoint = self.rect.centerx
+                    self.attack_effect_executions = 0
+
+                if self.frame_index >= 4:
+                    if self.attack_effect_executions == 0:
+                        if abs(self.rect.centerx - self.position_checkpoint) < 1000:
+                            self.rect.x += 4 - (8 * self.flip)
+                            # Repeat animation
+                            if self.frame_index >= 8:
+                                self.frame_index = 4
+
+                    if self.rect.left <= 0 or self.rect.right >= self.screen.get_width():
+                        self.attack_effect_executions = 1
+
+            if self.attack_data["strong_attack"]["trigger"]:
+                if self.frame_index == 3:
+                    self.rect.y -= 9
+                    self.vel_y = 0
+
+            if self.attack_data["strong_jump_attack"]["trigger"]:
+                if self.in_air:
+                    self.rect.x += 6 - (12 * self.flip)
+                    self.rect.y += 8
+                    if self.frame_index == 4:
+                        self.frame_index = 1
+
+            # Special
+            if self.attack_data["special_attack"]["trigger"]:
+                if self.frame_index > 2:
+                    self.rect.x += 6 - (12 * self.flip)
+
+            if self.attack_data["special_attack_up"]["trigger"]:
+                if self.frame_index == 6:
+                    self.position_checkpoint = self.rect.centerx
+                    self.attack_effect_executions = 0
+                if self.frame_index >= 7:
+                    if self.attack_effect_executions == 0:
+                        if abs(self.rect.centerx - self.position_checkpoint) < 100:
+                            self.rect.x += 4 - (8 * self.flip)
+                        else:
+                            self.position_checkpoint = self.rect.centerx
+                            self.attack_effect_executions = 1
+
+                    if self.attack_effect_executions == 1:
+                        if abs(self.rect.centerx - self.position_checkpoint) < 200:
+                            self.rect.x -= 4 - (8 * self.flip)
+                        else:
+                            self.attack_effect_executions = 2
+
+                        # In case it collides with wall to prevent infinite loop
+                        if self.rect.left <= 0 or self.rect.right >= self.screen.get_width():
+                            self.attack_effect_executions = 2
+
+                    if self.attack_effect_executions < 2:
+                        # Repeat animation
+                        if self.frame_index > 11:
+                            self.frame_index = 7
+
+            if self.attack_data["special_attack_down"]["trigger"]:
+                if self.frame_index > 3:
+                    self.rect.x += 2 - (4 * self.flip)
+
 
         def attack_triggers():
             # The attacking rectangle will only activate at certain frame_indexes (with some having varying DPS):
@@ -272,6 +367,7 @@ class Sanji(Fighter):
                 if self.attacking:
                     # Updating attack list
                     self.attack_list_trigger = [False]
+                    self.attack_effect_executions = 0
 
                     self.attacking = False
                     for attack in self.attack_data.values():

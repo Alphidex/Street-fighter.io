@@ -35,13 +35,13 @@ Heihachi_ANIMATION_STEPS = [19, 7, 18, 16, 16, 15, 13, 12, 9, 8, 8, 8, 8, 6, 5, 
 Ichigo_SCALE = 2.5
 Ichigo_OFFSET = [56, 50]
 Ichigo_DATA = [160, 160, Ichigo_SCALE, Ichigo_OFFSET]
-Ichigo_ANIMATION_STEPS = [15, 13, 13, 12, 12, 12, 11, 9, 9, 8, 7, 7, 7, 7, 5, 5, 5, 4, 4, 3, 2]
+Ichigo_ANIMATION_STEPS = [15, 13, 13, 12, 12, 12, 11, 9, 9, 8, 7, 7, 7, 7, 5, 5, 5, 4, 4, 2, 2]
 
 """ Renji """
 Renji_SCALE = 2.5
 Renji_OFFSET = [58, 50]
 Renji_DATA = [160, 160, Renji_SCALE, Renji_OFFSET]
-Renji_ANIMATION_STEPS = [12, 11, 18, 19, 10, 10, 12, 11, 11, 10, 10, 9, 8, 8, 7, 7, 6, 6, 5, 4, 4, 4, 3, 1]  # Len = 24
+Renji_ANIMATION_STEPS = [12, 11, 18, 19, 10, 10, 12, 11, 11, 10, 10, 9, 8, 8, 7, 7, 6, 6, 5, 4, 4, 4, 2, 1]  # Len = 24
 
 """ Sanji """
 Sanji_SCALE = 2.5

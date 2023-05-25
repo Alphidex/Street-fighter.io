@@ -16,20 +16,8 @@ class Ichigo(Fighter):
         self.projectile_list = self.load_images(sprite_sheet, animation_steps, "projectiles")
         self.image = self.animation_list[self.action][self.frame_index]
         # Attacks
-        self.attack_data = {
-            "normal_attack": {"trigger": False, "cooldown": 80, "frame_index":2, "damage": 1, "knockback": 1, "action":13, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - 30 - (140 * self.flip),self.rect.y - 20, 200, 1.2 * self.rect.height)},
-            "normal_attack_up": {"trigger": False, "cooldown": 75, "frame_index":2, "damage": 1, "knockback": 1, "action":10, "range_attack":False, "rect":pygame.Rect(self.rect.centerx - 140,self.rect.y - 105, 280, 1.65 * self.rect.height)},
-            "normal_attack_down": {"trigger": False, "cooldown": 55, "frame_index":4, "damage": 1, "knockback": 1, "action":9, "range_attack":False, "rect":pygame.Rect(self.rect.centerx - 140,self.rect.y + 70, 280, 90)},
-            "normal_jump_attack": {"trigger": False, "cooldown": 85, "frame_index":2, "damage": 1, "knockback": 1, "action":15, "range_attack":False, "rect":pygame.Rect(self.rect.centerx - 30 - (110 * self.flip),self.rect.y - 40, 170, self.rect.height + 60)},
-            "normal_attack_forward": {"trigger": False, "cooldown": 60, "frame_index": 1, "damage": 1, "knockback": 1,"action": 14, "range_attack": False, "rect":pygame.Rect(self.rect.centerx - (1.35 * self.rect.width * self.flip),self.rect.y * 1.09, 1.35 * self.rect.width, 0.35 * self.rect.height)},
-            "strong_attack": {"trigger": False, "cooldown": 90, "frame_index":4<=self.frame_index<=10, "damage": 1, "knockback": 1, "action":1, "range_attack":False, "rect":pygame.Rect(self.rect.centerx - 140,self.rect.y - 42, 280, 0.6 * self.rect.height)},
-            "strong_attack_up": {"trigger": False, "cooldown": 100, "frame_index":3, "damage": 1, "knockback": 1, "action":3, "range_attack":True, "rect":pygame.Rect(self.rect.centerx - (90 * self.flip),self.rect.y - 33, 90, 0.9 * self.rect.height)},
-            "strong_attack_down": {"trigger": False, "cooldown": 90, "frame_index":4, "damage": 1, "knockback": 1, "action":8, "range_attack":False, "rect": pygame.Rect(self.rect.centerx - 130,self.rect.y + 20, 260, 140)},
-            "strong_jump_attack": {"trigger": False, "cooldown": 70, "frame_index":3, "damage": 1, "knockback": 1, "action":2, "range_attack":True, "rect":  pygame.Rect(self.rect.centerx - 30 - (60 * self.flip),self.rect.y, 120, self.rect.height)},
-            "special_attack": {"trigger": False, "cooldown": 110, "frame_index":7, "damage": 1, "knockback": 1, "action":0, "range_attack":True, "rect": pygame.Rect(self.rect.centerx - (1.4 * self.rect.width * self.flip),self.rect.y + 24, 1.4 * self.rect.width, 0.56 * self.rect.height)},
-            "special_attack_up": {"trigger": False, "cooldown": 110, "frame_index":5, "damage": 1, "knockback": 1, "action":5, "range_attack":True, "rect":pygame.Rect(self.rect.centerx - 130,self.rect.y - 150, 260, 150 + self.rect.height)}
-            #"special_attack_down": {"trigger": False, "cooldown": 110, "frame_index": 10, "damage": 1, "knockback": 1, "action": ?, "range_attack":, "rect": pygame.Rect(self.rect.centerx - 150 - (1 * self.flip),self.rect.y - 50, 300, 150 + self.rect.height)}
-        }
+        self.attack_data = self.get_attack_data()
+        self.exclude_attacks = ["special_attack_down"]
 
     # Image methods
     def load_images(self, sprite_sheet, animation_steps, choice):
@@ -82,9 +70,8 @@ class Ichigo(Fighter):
         pygame.draw.rect(surface, (255, 0, 0), self.rect, 4)
 
     # Attack Methods
-    def update_attack_data(self):
-        # Continuous declaration to update the values like Rect Position and Trigger Values
-        self.attack_data = {
+    def get_attack_data(self):
+        data = {
             "normal_attack": {"trigger": False, "cooldown": 80, "frame_index": 2, "damage": 1, "knockback": 1,
                               "action": 13, "range_attack": False,
                               "rect": pygame.Rect(self.rect.centerx - 30 - (140 * self.flip), self.rect.y - 20, 200,
@@ -107,7 +94,7 @@ class Ichigo(Fighter):
                                                           0.35 * self.rect.height)},
             "strong_attack": {"trigger": False, "cooldown": 90, "frame_index": 4 <= self.frame_index <= 10, "damage": 1,
                               "knockback": 1, "action": 1, "range_attack": False,
-                              "rect": pygame.Rect(self.rect.centerx - 140, self.rect.y - 42, 280,
+                              "rect": pygame.Rect(self.rect.centerx - 150 + (20 * self.flip), self.rect.y - 42, 280,
                                                   0.6 * self.rect.height)},
             "strong_attack_up": {"trigger": False, "cooldown": 100, "frame_index": 3, "damage": 1, "knockback": 1,
                                  "action": 3, "range_attack": True,
@@ -130,28 +117,37 @@ class Ichigo(Fighter):
                                                       150 + self.rect.height)}
             # "special_attack_down": {"trigger": False, "cooldown": 110, "frame_index": 10, "damage": 1, "knockback": 1, "action": ?, "range_attack":, "rect": pygame.Rect(self.rect.centerx - 150 - (1 * self.flip),self.rect.y - 50, 300, 150 + self.rect.height)}
         }
+        return data
+
+    def update_attack_data(self):
+        # Continuous declaration to update the values like Rect Position and Trigger Values
+        self.attack_data = self.get_attack_data()
         for key, value in self.attack_triggers.items():
             if key in self.attack_data.keys():
                 self.attack_data[key]["trigger"] = value["trigger"]
-
-    def attack_rectangle_collision(self, surface, target):
-        # HIT-BOXES
-        self.update_attack_data()
 
         for attack in self.attack_data.values():
             if attack["trigger"]:
                 self.attacking_rectangle = attack["rect"]
 
+    def attack_rectangle_collision(self, surface, target):
+        # HIT-BOXES
+        self.update_attack_data()
+
         if self.attacking_rectangle is not None:
             # Rectangle collisions
             if self.attacking_rectangle.colliderect(target.rect):
-                target.hit = True
-                target.frame_index = 0
+                if not target.block:
+                    target.hit = True
+                    target.frame_index = 0
 
-                # Taking Damage
-                for attack in self.attack_data.values():
-                    if attack["trigger"]:
-                        target.health -= attack["damage"]
+                    # Taking Damage
+                    for attack in self.attack_data.values():
+                        if attack["trigger"]:
+                            target.health -= attack["damage"]
+
+                else:
+                    target.shield_health -= 20
 
                 # Knock-back - Once
                 if target.flip:
@@ -181,13 +177,17 @@ class Ichigo(Fighter):
                                                     + str(len(self.ranged_attack_instance_list)))
 
             self.ranged_attack_instance_list[len(self.ranged_attack_instance_list) - 1] = \
-                self.Ranged_Ichigo(self.flip, self.projectile_list, action, self.rect, "Ichigo")
+                self.Ranged_Ichigo(self.flip, self.projectile_list, action, self.rect, "Ichigo", self.opponent)
 
         def attack_effects():
             # Continuous knockback and effects
             if target.hit and not target.dead:
                 if self.attack_data["special_attack"]["trigger"]:
                     target.rect.x += 2 + (-4 * self.flip)
+
+            if self.attack_data["normal_attack"]["trigger"]:
+                if self.frame_index == 2:
+                    self.rect.x += 2 - (4*self.flip)
 
         def attack_triggers():
             # The attacking rectangle will only activate at certain frame_indexes (with some having varying DPS):
@@ -260,7 +260,7 @@ class Ichigo(Fighter):
 
             # Continue holding the blocking animation
             elif self.block and (not self.attacking):
-                self.frame_index = len(self.animation_list[self.action]) - 1
+                self.frame_index = 1
 
             else:
                 self.frame_index = 0
@@ -335,8 +335,8 @@ class Ichigo(Fighter):
 
 
     class Ranged_Ichigo(Ranged_Attack):
-        def __init__(self, flip, attack_animation_list, action, character_rect, character):
-            super().__init__(flip, attack_animation_list, action, character_rect, character)
+        def __init__(self, flip, attack_animation_list, action, character_rect, character, opponent):
+            super().__init__(flip, attack_animation_list, action, character_rect, character, opponent)
 
             # Create Rectangle
             self.rect = self.create_rectangle(character_rect)  # To check the position of the character
@@ -390,7 +390,6 @@ class Ichigo(Fighter):
                         self.rect.y - (offset[1] * image_scale)))
                     pygame.draw.rect(surface, (143, 24, 199), self.rect, 4)
 
-
         def update_ranged_attack(self, surface):
             animation_cooldown = 160
             # Refresh the image
@@ -404,25 +403,25 @@ class Ichigo(Fighter):
 
                 # If the end of the animation is reached:
                 if self.frame_index >= len(self.attack_animation_list[self.action]):
-                    self.frame_index = 0
+                    self.frame_index = len(self.attack_animation_list[self.action]) - 2
 
                 #Attacks moving in different directions
                 if self.action == 2:
                     # Image movement
-                    self.rect.x += 2 + (-4 * self.flip)
-                    self.rect.y += 2
+                    self.rect.x += 6 + (-12 * self.flip)
+                    self.rect.y += 8
 
                 elif self.action == 3:
                     # Image movement
-                    self.rect.x += 2 + (-4 * self.flip)
-                    self.rect.y -= 2
+                    self.rect.x += 6 + (-12 * self.flip)
+                    self.rect.y -= 8
 
                 elif self.action == 5:
-                    self.rect.y -= 2
+                    self.rect.y -= 8
 
                 else:
                     # Image movement
-                    self.rect.x += 2 + (-4 * self.flip)
+                    self.rect.x += 9 + (-18 * self.flip)
 
             if self.rect.left >= 1280 or self.rect.right <= 0:
                 self.attacking = False
@@ -431,8 +430,11 @@ class Ichigo(Fighter):
             if self.rect.colliderect(target.rect):
                 if self.collision == False:
                     self.collision = True
-                    target.hit = True
-                    target.health -= 5
+                    if not target.block:
+                        target.hit = True
+                        target.health -= 5
+                    else:
+                        target.shield_health -= 20
                     # Knock-back
                     if target.flip:
                         target.rect.x += 25
