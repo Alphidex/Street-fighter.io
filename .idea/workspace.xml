@@ -9,6 +9,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b5cd2ac9-97d8-43a2-a676-0c1663c2c34b" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/level_design.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Characters_Code/Asuka.py" beforeDir="false" afterPath="$PROJECT_DIR$/Characters_Code/Asuka.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Characters_Code/Daichi.py" beforeDir="false" afterPath="$PROJECT_DIR$/Characters_Code/Daichi.py" afterDir="false" />
@@ -21,19 +22,24 @@
       <change beforePath="$PROJECT_DIR$/Characters_Code/Uryu.py" beforeDir="false" afterPath="$PROJECT_DIR$/Characters_Code/Uryu.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Characters_Code/Zoro.py" beforeDir="false" afterPath="$PROJECT_DIR$/Characters_Code/Zoro.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/GUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/GUI.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Images/Background Images/pixel art game menu.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/Images/Background Images/pixel art game menu.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Images/Game Characters Organised/Renji/Base/Walk.png" beforeDir="false" afterPath="$PROJECT_DIR$/Images/Game Characters Organised/Renji/Base/Walk.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Images/Game Characters Organised/Renji/Result.png" beforeDir="false" afterPath="$PROJECT_DIR$/Images/Game Characters Organised/Renji/Result.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Images/Game Characters Organised/Renji/Strong Attack/Strong Air 200 x 200.png" beforeDir="false" afterPath="$PROJECT_DIR$/Images/Game Characters Organised/Renji/Strong Attack/Strong Air 200 x 200.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Images/Game Characters Organised/Renji/Strong Attack/Strong.png" beforeDir="false" afterPath="$PROJECT_DIR$/Images/Game Characters Organised/Renji/Strong Attack/Strong.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/character_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/character_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Images/Background Images/Options Icons/go_back.png" beforeDir="false" afterPath="$PROJECT_DIR$/Images/Background Images/Options Icons/go_back.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Images/Background Images/background_image.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/character_selection.py" beforeDir="false" afterPath="$PROJECT_DIR$/character_selection.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/characters.py" beforeDir="false" afterPath="$PROJECT_DIR$/characters.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/game_HUB.py" beforeDir="false" afterPath="$PROJECT_DIR$/game_HUB.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/game_HUB.py" beforeDir="false" afterPath="$PROJECT_DIR$/game.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="PREVIOUS_COMMIT_AUTHORS">
@@ -54,15 +60,36 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;ToolWindowRun.ShowToolbar&quot;: &quot;false&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "ToolWindowRun.ShowToolbar": "false",
+    "settings.editor.selected.configurable": "reference.settingsdialog.IDE.editor.colors"
   }
-}</component>
-  <component name="RunManager">
+}]]></component>
+  <component name="RunManager" selected="Python.main">
+    <configuration name="game" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Street-fighter.io" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/game.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="Street-fighter.io" />
       <option name="INTERPRETER_OPTIONS" value="" />

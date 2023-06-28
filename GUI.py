@@ -1,4 +1,6 @@
 import pygame
+from os import walk
+from random import choice
 
 def load_image(path):
     return pygame.image.load(r"{}".format(path)).convert_alpha()
@@ -15,21 +17,21 @@ def create_rectangle(x, y, width, height):
     return rect
 
 class Display_Character_Stats:
-    def __init__(self, player, health, rect):
+    def __init__(self, player, health, rect, stamina):
         self.screen = pygame.display.get_surface()
         self.health = health
-        self.stamina = "100%"
+        self.stamina = stamina
         self.sp_count = 0
         self.player = player
         self.player_rect = rect
         self.player_image = load_image(rf"Images/Background Images/Player Stats/player_{self.player}.png")
         self.player_image = pygame.transform.scale_by(self.player_image, 0.2)
 
-    def draw_everything(self, health, character_rect):
+    def draw_everything(self, health, stamina, character_rect):
         self.draw_player_label(character_rect)
         self.draw_health_bar(health)
         self.draw_health_label()
-        self.draw_stamina_bar()
+        self.draw_stamina_bar(stamina)
         self.draw_sp_bar()
 
     def draw_player_label(self, rect):
@@ -47,25 +49,29 @@ class Display_Character_Stats:
         else:
             rect = pygame.Rect(790, 20, 400, 40)
 
-        pygame.draw.rect(self.screen, RED, rect, 2)
         pygame.draw.rect(self.screen, YELLOW, (rect.x, rect.y, 400 * ratio, 40))
+        pygame.draw.rect(self.screen, RED, rect, 2)
 
     def draw_health_label(self):
         font = pygame.font.Font("./Fonts/retro.ttf", 40)
-        text_surface = font.render(f"{self.health}%", False, "white")
+        text_surface = font.render(f"Health: {self.health}%", False, "white")
         if self.player == 1:
-            pos = (300, 25)
+            pos = (270, 25)
         else:
-            pos = (1070, 25)
+            pos = (920, 25)
         self.screen.blit(text_surface, pos)
 
-    def draw_stamina_bar(self):
-        if self.player == 1:
-            rect = (230, 100, 300, 30)
-        else:
-            rect = (800, 100, 300, 30)
+    def draw_stamina_bar(self, stamina):
+        self.stamina = stamina
+        ratio = self.stamina/100
 
-        pygame.draw.rect(self.screen, "blue", rect)
+        if self.player == 1:
+            rect = pygame.Rect(230, 80, 300, 30)
+        else:
+            rect = pygame.Rect(800, 80, 300, 30)
+
+        pygame.draw.rect(self.screen, "blue", (rect.x, rect.y, ratio * rect.width, rect.height))
+        pygame.draw.rect(self.screen, "white", rect, 2)
 
     def draw_sp_bar(self):
         font = pygame.font.Font("./Fonts/retro.ttf", 40)
@@ -108,28 +114,22 @@ class Game_States:
         # Screen
         self.screen = pygame.display.get_surface()
         
-        # Fight Countdown
-        self.start_countdown = 3
-        self.update_timer = pygame.time.get_ticks()
-
-        # Round Countdown
-        self.round_duration_mins = 3 * 60
-        
         # Options
-        self.options_entered = False
+        self.options_entered = True
         self.resolution_entered = False
         self.volume_entered = False
         self.key_binds_entered = False
 
         # Delay
         self.check_once = False
-        self.delay_timer = None
+        self.delay_timer = 0
         
         # Options Bg
         self.options_bg = load_image("Images/Background Images/options_bg.png")
         self.options_bg = pygame.transform.scale(self.options_bg, (self.screen.get_width(), self.screen.get_height()))
 
         self.option_go_back = load_image("Images/Background Images/Options Icons/go_back.png")
+        self.option_go_back = pygame.transform.scale(self.option_go_back, (80, 80))
         self.option_go_back = pygame.transform.scale(self.option_go_back, (100, 100))
 
         self.option_exit = load_image("Images/Background Images/Options Icons/exit_menu.png")
@@ -152,9 +152,27 @@ class Game_States:
         mouse_press = pygame.mouse.get_pressed()
         font = pygame.font.Font("./Fonts/retro.ttf", 80)
         font2 = pygame.font.Font("./Fonts/retro.ttf", 40)
+        self.options_entered = True
+
+        # Go back icon
+        self.screen.blit(self.option_go_back, (50, 50))
+        go_back_rect = self.option_go_back.get_rect()
+
+        if go_back_rect.collidepoint(mouse_pos):
+            if mouse_press[0]:
+                if not (self.resolution_entered or self.volume_entered or self.key_binds_entered) \
+                        and pygame.time.get_ticks() - self.delay_timer > 300:
+                    self.options_entered = False
+                    self.check_once = False
+                else:
+                    self.delay_timer = pygame.time.get_ticks()
+
+                if self.resolution_entered: self.resolution_entered = False
+                if self.volume_entered: self.volume_entered = False
+                if self.key_binds_entered: self.key_binds_entered = False
 
         # Delay
-        if not self.check_once:
+        if not self.check_once and self.options_entered:
             self.check_once = True
             self.delay_timer = pygame.time.get_ticks()
 
@@ -198,6 +216,8 @@ class Game_States:
         self.options_resolution_entered(font, mouse_pos, mouse_press)
 
         self.options_key_binds_entered(font2, mouse_pos, mouse_press)
+
+        return self.options_entered
 
     def options_volume_entered(self, font, mouse_pos, mouse_press):
         if self.volume_entered:
@@ -392,33 +412,91 @@ class Game_States:
                 if self.button_held:
                     mouse_scrolling()
 
-    def fight_countdown(self):
-        text_surface = self.intro_font.render(f"{self.start_countdown}", False, "#b03d17")
-        rect = text_surface.get_rect(topleft=(660, 200))
+class Map_Management:
+    def __init__(self):
+        # Display
+        self.screen = pygame.display.get_surface()
+        self.background_image = pygame.image.load(
+            r"Images/Background Images/character_choice_background.jpg").convert_alpha()
+        self.background_image = pygame.transform.scale(self.background_image,
+                                                       (self.screen.get_width(), self.screen.get_height()))
 
-        if self.start_countdown >= 0:
-            pygame.display.get_surface().blit(text_surface, rect.topleft)
+        # Maps
+        self.game_maps = self.import_maps()
+        self.map_rects = []
+        self.map_selection_complete = False
+        self.map_selected = None
+        self.fighter_pos_per_map = [[(360, 240), (920, 240)], [(360, 240), (920, 240)],
+                                    [(360, 240), (920, 240)], [(360, 240), (920, 240)]]
+        self.fighter_positions = None
+        self.previously_selected_maps = []
+        
+        # Font
+        self.font = pygame.font.Font("./Fonts/retro.ttf", 70)
 
-            if pygame.time.get_ticks() - self.update_timer > 600:
-                self.start_countdown -= 1
-                self.update_timer = pygame.time.get_ticks()
-        else:
-            return True
+    def import_maps(self):
+        game_maps = []
+        for _,__,img_files in walk("Images/Background Images/Game Maps"):
+            for image in img_files:
+                full_path = "Images/Background Images/Game Maps" + "/" + image
+                surface = pygame.image.load(full_path).convert_alpha()
+                surface = pygame.transform.scale(surface, (1280, 720))
+                game_maps.append(surface)
+        return game_maps
 
-        return False
+    def run(self):
+        self.draw_maps()
+        self.map_selection()
 
-    def round_countdown(self):
-        text = f"{self.round_duration_mins // 60} : {self.round_duration_mins % 60}"
-        text_surface = self.intro_font.render(text, False, "#db130f")
-        rect = text_surface.get_rect(topleft=(620, 20))
+        return self.fighter_positions
+    
+    def draw_map_in_arena(self):
+        draw_bg(self.screen, self.map_selected)
+    
+    def map_selection(self):
+        mouse_pos = pygame.mouse.get_pos()
+        mouse_press = pygame.mouse.get_pressed()
 
-        if self.round_duration_mins >= 0:
-            pygame.display.get_surface().blit(text_surface, rect.topleft)
+        for index, rect in enumerate(self.map_rects):
+            if rect.collidepoint(mouse_pos):
+                pygame.draw.rect(self.screen, "white", rect, 2)
+                if mouse_press[0]:
+                    self.map_selected = self.game_maps[index]
+                    self.fighter_positions = self.fighter_pos_per_map[index]
+                    self.previously_selected_maps.append(self.map_selected)
+                    self.map_selection_complete = True
 
-            if pygame.time.get_ticks() - self.update_timer > 1000:
-                self.round_duration_mins -= 1
-                self.update_timer = pygame.time.get_ticks()
-        else:
-            return True
+    def draw_maps(self):
+        draw_bg(self.screen, self.background_image)
+        # Font
+        text = self.font.render("Map Selection", False, "#ad4809")
+        self.screen.blit(text, (550, 60))
+        # Defining initial position
+        pos = (50, 400)
 
-        return False
+        # Resizing the images
+        resized_maps = []
+        self.map_rects = []
+        for x, image in enumerate(self.game_maps):
+            image = pygame.transform.scale(image, (270, 220))
+            resized_maps.append(image)
+            self.screen.blit(image, (pos[0] + x * 290, pos[1]))
+            rect = pygame.Rect(pos[0] + x * 290, pos[1], 270, 220)
+            self.map_rects.append(rect)
+
+    def randomize_map(self, p1, p2):
+        # Get a random map
+        map_options = []
+        for map in self.game_maps:
+            if map not in self.previously_selected_maps:
+                map_options.append(map)
+        random_map = choice(map_options)
+        
+        # Reconfigure the player position and current map
+        self.previously_selected_maps.append(random_map)
+        index = self.game_maps.index(random_map)
+        self.map_selected = random_map
+        self.fighter_positions = self.fighter_pos_per_map[index]
+
+        p1.rect.topleft = self.fighter_positions[0]
+        p2.rect.topleft = self.fighter_positions[1]

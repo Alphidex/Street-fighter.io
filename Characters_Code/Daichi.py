@@ -76,42 +76,42 @@ class Daichi(Fighter):
     # Attack Methods
     def get_attack_data(self):
         data = {
-            "normal_attack": {"trigger": False, "cooldown": 140, "frame_index": 1, "damage": 1, "knockback": 1,
+            "normal_attack": {"trigger": False, "cooldown": 140, "frame_index": 1, "damage": 1.7, "knockback": 1,
                               "action": 15, "range_attack": False,
                               "rect": pygame.Rect(self.rect.centerx - (1.35 * self.rect.width * self.flip),
                                                   self.rect.y * 1.125, 1.35 * self.rect.width, 0.5 * self.rect.height)},
-            "normal_attack_up": {"trigger": False, "cooldown": 140, "frame_index": 2, "damage": 1, "knockback": 1,
+            "normal_attack_up": {"trigger": False, "cooldown": 140, "frame_index": 2, "damage": 1.5, "knockback": 1,
                                  "action": 11, "range_attack": False,
                                  "rect": pygame.Rect(self.rect.centerx - 80 - (50 * self.flip), self.rect.y - 28, 220,
                                                      1.2 * self.rect.height)},
-            "normal_attack_down": {"trigger": False, "cooldown": 140, "frame_index": 1, "damage": 1, "knockback": 1,
+            "normal_attack_down": {"trigger": False, "cooldown": 140, "frame_index": 1, "damage": 1.6, "knockback": 1,
                                    "action": 10, "range_attack": False,
                                    "rect": pygame.Rect(self.rect.centerx - (200 * self.flip), self.rect.y + 70, 200,
                                                        80)},
-            "normal_jump_attack": {"trigger": False, "cooldown": 140, "frame_index": 3, "damage": 1, "knockback": 1,
+            "normal_jump_attack": {"trigger": False, "cooldown": 140, "frame_index": 3, "damage": 1.4, "knockback": 1,
                                    "action": 6, "range_attack": False,
                                    "rect": pygame.Rect(self.rect.centerx - 30 - (30 * self.flip), self.rect.y - 20, 90,
                                                        self.rect.height + 40)},
-            "strong_attack": {"trigger": False, "cooldown": 140, "frame_index": 2 <= self.frame_index <= 11, "damage": 1,
-                              "knockback": 1, "action": 2, "range_attack": False,
+            "strong_attack": {"trigger": False, "cooldown": 140, "frame_index": 2 <= self.frame_index <= 11, "damage": 0.7,
+                              "knockback": 0.1, "action": 2, "range_attack": False,
                               "rect": pygame.Rect(self.rect.centerx - 150, self.rect.y + 10, 300, 105)},
-            "strong_attack_up": {"trigger": False, "cooldown": 140, "frame_index": 6, "damage": 1, "knockback": 1,
+            "strong_attack_up": {"trigger": False, "cooldown": 140, "frame_index": 6, "damage": 6.5, "knockback": 2,
                                  "action": 3, "range_attack": False,
                                  "rect": pygame.Rect(self.rect.centerx - 100 - (40 * self.flip), self.rect.y - 28, 240,
                                                      1.2 * self.rect.height)},
-            "strong_attack_down": {"trigger": False, "cooldown": 140, "frame_index": 4, "damage": 1, "knockback": 1,
+            "strong_attack_down": {"trigger": False, "cooldown": 140, "frame_index": 4, "damage": 9, "knockback": 5,
                                    "action": 9, "range_attack": False,
                                    "rect": pygame.Rect(self.rect.centerx - 30 - (30 * self.flip), self.rect.y - 20, 90,
                                                        self.rect.height + 40)},
             "strong_jump_attack": {"trigger": False, "cooldown": 140, "frame_index": 3 <= self.frame_index <= 5,
-                                   "damage": 1, "knockback": 1, "action": 6, "range_attack": False,
+                                   "damage": 2, "knockback": 1, "action": 6, "range_attack": False,
                                    "rect": pygame.Rect(self.rect.centerx - 30 - (30 * self.flip), self.rect.y - 20, 90,
                                                        self.rect.height + 40)},
-            "special_attack": {"trigger": False, "cooldown": 140, "frame_index": 3, "damage": 1, "knockback": 1,
+            "special_attack": {"trigger": False, "cooldown": 140, "frame_index": 3, "damage": 20, "knockback": 1,
                                "action": 0, "range_attack": True,
                                "rect": pygame.Rect(self.rect.centerx - (1.7 * self.rect.width * self.flip),
                                                    self.rect.y - 10, 170, 10 + self.rect.height)},
-            "special_attack_down": {"trigger": False, "cooldown": 140, "frame_index": 8, "damage": 1, "knockback": 1,
+            "special_attack_down": {"trigger": False, "cooldown": 140, "frame_index": 8, "damage": 30, "knockback": 1,
                                     "action": 1, "range_attack": True,
                                     "rect": None}
         }
@@ -391,8 +391,8 @@ class Daichi(Fighter):
             self.stun_time_started = None
             self.extend_animation = pygame.time.get_ticks()
             self.attack_data = {
-                "special_attack": {"trigger": False, "action": 0, "damage": 5, "animation_refresh_time": 150},
-                "special_attack_down": {"trigger": False, "action": 1, "damage": 5, "animation_refresh_time": 300}
+                "special_attack": {"trigger": False, "action": 0, "damage": 20, "animation_refresh_time": 150},
+                "special_attack_down": {"trigger": False, "action": 1, "damage": 15, "animation_refresh_time": 300}
             }
 
             # Create Rectangle
@@ -419,8 +419,6 @@ class Daichi(Fighter):
             if self.action == 1 and self.frame_index >= 1:
                 rect = img.get_bounding_rect()
                 img = pygame.transform.scale(img, (rect.width * 3, rect.height * 3))
-                self.rect.width += 20
-                self.rect.height += 20
 
             if self.action == 0:
                 surface.blit(img, (

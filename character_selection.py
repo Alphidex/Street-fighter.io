@@ -17,7 +17,7 @@ from Characters_Code.Zoro import *
 """
 
 class Select_Characters:
-    def __init__(self, character_data):
+    def __init__(self, character_data, fighter_positions):
         # Display
         self.screen = pygame.display.get_surface()
         self.background_image = pygame.image.load(
@@ -25,6 +25,7 @@ class Select_Characters:
         self.background_image = pygame.transform.scale(self.background_image,
                                                       (self.screen.get_width(), self.screen.get_height()))
         self.start_selected = False
+
         # Characters
         self.character_data = character_data
         self.selected_rect = []
@@ -35,6 +36,7 @@ class Select_Characters:
         self.click_held = False
         self.fighter_1 = None
         self.fighter_2 = None
+        self.fighters_positions = fighter_positions
 
     def run(self):
         self.draw_character_images_background()
@@ -150,6 +152,7 @@ class Select_Characters:
             if mouse_press[0]:
                 status = True
         return status
+
     def check_if_character_selected(self):
         mouse_pos = pygame.mouse.get_pos()
         mouse_press = pygame.mouse.get_pressed()
@@ -165,10 +168,12 @@ class Select_Characters:
                         for character in self.character_data.keys():
                             if character == self.class_dictionary[index][1]:
                                 self.selected_rect.append(rect)
-                                self.fighter_1 = self.fighter_1(1, 360, 240, False, self.character_data[character][0],
-                                                        self.character_data[character][1],
-                                                        self.character_data[character][2],
-                                                        self.character_data[character][3])
+                                self.fighter_1 = self.fighter_1(1, self.fighters_positions[0][0],
+                                                                self.fighters_positions[0][1],
+                                                                False, self.character_data[character][0],
+                                                                self.character_data[character][1],
+                                                                self.character_data[character][2],
+                                                                self.character_data[character][3])
                     else:
                         self.characters_selected = 2
                         self.click_held = True
@@ -176,10 +181,12 @@ class Select_Characters:
                         for character in self.character_data.keys():
                             if character == self.class_dictionary[index][1]:
                                 self.selected_rect.append(rect)
-                                self.fighter_2 = self.fighter_2(2, 920, 240, True, self.character_data[character][0],
-                                                        self.character_data[character][1],
-                                                        self.character_data[character][2],
-                                                        self.character_data[character][3])
+                                self.fighter_2 = self.fighter_2(2, self.fighters_positions[1][0],
+                                                                self.fighters_positions[1][1],
+                                                                True, self.character_data[character][0],
+                                                                self.character_data[character][1],
+                                                                self.character_data[character][2],
+                                                                self.character_data[character][3])
 
         if not mouse_press[0]:
             self.click_held = False

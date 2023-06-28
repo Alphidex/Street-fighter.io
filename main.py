@@ -1,6 +1,6 @@
 import pygame
 import sys
-from game_HUB import *
+from game import *
 
 pygame.init()
 
@@ -34,6 +34,10 @@ while running:
     # Other Methods to exit the game
     if game.exit_game:
         running = False
+
+    # Reset the game once all levels complete
+    if game.reset:
+        game = Game()
 
     # Update the screen
     pygame.display.update()

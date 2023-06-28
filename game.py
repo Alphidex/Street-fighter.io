@@ -4,11 +4,13 @@ from characters import Fighter
 from GUI import *
 from character_selection import *
 from debug import debug
+from level_design import Level_Design
 
 class Game:
     def __init__(self):
         # Key Game Variables
         self.exit_game = False
+        self.reset = False
 
         # Display
         self.screen = pygame.display.get_surface()
@@ -16,7 +18,7 @@ class Game:
         self.SCREEN_HEIGHT = self.screen.get_height()
 
         # Backgrounds + Icons
-        self.game_bg = load_image("Images/Background Images/background_image.jpg")
+        self.game_bg = load_image("Images/Background Images/Game Maps/arena_map1.jpg")
         self.game_bg = pygame.transform.scale(self.game_bg, (self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
 
         self.start_menu_bg = load_image("Images/Background Images/pixel art game menu.jpg")
@@ -32,16 +34,21 @@ class Game:
         self.volume_entered = False
         self.key_binds_entered = False
 
+        # Map Selection
+        self.map_management = Map_Management()
+        self.fighters_pos = None
+
         # Arena
         self.game_state = Game_States()
-        self.fight_countdown_complete = False
-        self.round_countdown_complete = False
+
+        # Level
+        self.level = None
 
         # Characters
         self.CHARACTER_DATA = self.get_CHARACTER_DATA()
 
         # Character Selection
-        self.fighters_selection = Select_Characters(self.CHARACTER_DATA)
+        self.fighters_selection = None
         self.fighters_selection_complete = False
         self.fighter_1 = None
         self.fighter_2 = None
@@ -75,19 +82,26 @@ class Game:
         return CHARACTER_DATA
 
     def run(self):
-        # Game Options
-        if self.fighters_selection_complete:
-            self.arena()
-            
-        elif not self.start_selected:
+        if not self.start_selected:
             if self.options_entered:
                 self.options()
             else:
                 self.start_menu()
+
+        elif not self.map_management.map_selection_complete:
+            self.fighters_pos = self.map_management.run()
+            if self.map_management.map_selection_complete:
+                self.fighters_selection = Select_Characters(self.CHARACTER_DATA, self.fighters_pos)
+
+        elif not self.fighters_selection_complete:
+            self.fighters_selection.run()
+            self.fighters_selection_complete, self.fighter_1, self.fighter_2 = self.fighters_selection.selection_complete()
+            if self.fighters_selection_complete:
+                self.level = Level_Design(self.fighter_1, self.fighter_2, self.fighters_pos, self.map_management)
+
         else:
-            if not self.fighters_selection_complete:
-                self.fighters_selection.run()
-                self.fighters_selection_complete, self.fighter_1, self.fighter_2 = self.fighters_selection.selection_complete()
+            if self.fighters_selection_complete:
+                self.arena()
 
     def start_menu(self):
         mouse_pos = pygame.mouse.get_pos()
@@ -129,16 +143,20 @@ class Game:
                         self.exit_game = True
 
     def options(self):
-        self.game_state.options()
-                
-    def arena(self):
-        draw_bg(self.screen, self.game_bg)
+        self.options_entered = self.game_state.options()
 
-        if self.fight_countdown_complete:
+    def arena(self):
+        self.map_management.draw_map_in_arena()
+
+        if self.level.fight_countdown_complete:
             # Character Methods
             self.fighter_1.run(self.fighter_2)
             self.fighter_2.run(self.fighter_1)
-            self.round_countdown_complete = self.game_state.round_countdown()
 
-        else:
-            self.fight_countdown_complete = self.game_state.fight_countdown()
+        self.level.run(self.fighter_1.health, self.fighter_2.health)
+        if self.level.quit:
+            self.reset = True
+
+        if self.level.match_lost:
+            self.start_selected = False
+            """  Make sure to reset everything here. - Should reset since the current instance is overwritten """

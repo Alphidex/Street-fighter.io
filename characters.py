@@ -44,6 +44,8 @@ class Fighter(pygame.sprite.Sprite):
         self.dead = False
         self.block = False
         self.shield_health = 100
+        self.stamina = 100
+        self.stamina_cost = 14
         self.create_shield = Create_Shield(self.shield_health)
         self.shield_broken = False
         self.shield_cooldown_timer = None
@@ -66,7 +68,7 @@ class Fighter(pygame.sprite.Sprite):
         self.rect.width, self.rect.height = 100, 143
 
         # Fighter GUI
-        self.fighter_gui = Display_Character_Stats(self.player, self.health, self.rect)
+        self.fighter_gui = Display_Character_Stats(self.player, self.health, self.rect, self.stamina)
 
         # Gravity
         self.vel_y = 0  # Keeps track of speed when the character is accelerating down due to gravity
@@ -126,7 +128,15 @@ class Fighter(pygame.sprite.Sprite):
     def run(self, target):
         self.draw(self.screen)
         self.draw_character_stats()
+        self.check_if_game_paused()
 
+        if self.game_paused:
+            self.debug_rect.select_rect()
+        else:
+            self.move(target)
+            self.update(target, self.screen)
+
+    def check_if_game_paused(self):
         keys = pygame.key.get_pressed()
 
         # Pause Mechanic
@@ -135,14 +145,8 @@ class Fighter(pygame.sprite.Sprite):
                 self.paused_time = pygame.time.get_ticks()
                 self.game_paused = not self.game_paused
 
-        if self.game_paused:
-            self.debug_rect.select_rect()
-        else:
-            self.move(target)
-            self.update(target, self.screen)
-
     def draw_character_stats(self):
-       self.fighter_gui.draw_everything(self.health, self.rect)
+       self.fighter_gui.draw_everything(self.health, self.stamina, self.rect)
 
     def draw(self, screen):
         pass
@@ -159,6 +163,22 @@ class Fighter(pygame.sprite.Sprite):
     # Update game state
     def update(self, target, screen):
         pass
+
+    def reset_character_state(self, pos):
+        # Fighter Status
+        self.rect.topleft = pos
+        self.health = 100
+        self.hit = False
+        self.knockback = False
+        self.stun = False
+        self.dead = False
+        self.block = False
+        self.shield_health = 100
+        self.stamina = 100
+        self.stamina_cost = 14
+        self.shield_broken = False
+        self.shield_cooldown_timer = None
+        self.in_air = False
 
     # Key Presses + Movement
     def check_key_presses(self, key, dx, SPEED):
@@ -183,7 +203,12 @@ class Fighter(pygame.sprite.Sprite):
                             self.running = True
 
                         # Dodging
-                        if key[self.control_keys[player]["dash"]]:
+                        if key[self.control_keys[player]["dash"]] and self.stamina - self.stamina_cost >= 0:
+                            if not self.dash:
+                                self.stamina -= self.stamina_cost
+                                if self.stamina < 0:
+                                    self.stamina = 0
+
                             self.dash = True
 
                         # Jumping
@@ -279,6 +304,12 @@ class Fighter(pygame.sprite.Sprite):
         # Define Gravity
         self.vel_y += GRAVITY
         dy += self.vel_y
+
+        # Stamina regen
+        if self.stamina < 100:
+            self.stamina += 0.12
+        if self.stamina > 100:
+            self.stamina = 100
 
         # Attacking in air, holds you in air
         if self.attack_triggers["normal_jump_attack"]["trigger"] or self.attack_triggers["strong_jump_attack"]["trigger"]:
