@@ -121,17 +121,18 @@ class Camera_Management(pygame.sprite.Group):
         self.screen = pygame.display.get_surface()
         self.game_maps = game_maps
         self.map_selected = None
-        self.pos = [[-110, -290], [-110, -140], [-110, -145], [-110, -150]]
-        self.boundaries = [[[[0, 550]]],
-                           [[[240, 540], [1062, 540]], [[534, 130], [620, 130]], [[-5, 318], [154, 318]], [[1213, 272], [1372, 272]]],
-                           [[[0, 550]], [[66, 293], [450, 293]], [[934, 293], [1318, 293]], [[202, 105], [1160, 105]]],
-                           [[[0, 550]], [[216, 290], [588, 290]], [[791, 290], [1163, 290]], [[310, 44], [974, 54]]]]
+        self.mapTopLeft = [[-110, -145], [-110, -140], [-110, -150], [-110, -180]]
+        self.boundaries = [[[[0, 550]], [[66, 293], [450, 293]], [[934, 293], [1318, 293]], [[202, 105], [1160, 105]]],
+                           [[[240, 540], [1062, 540]], [[534, 130], [620, 130]], [[-5, 318], [154, 318]],
+                            [[1213, 272], [1372, 272]]],
+                           [[[0, 550]], [[216, 290], [588, 290]], [[791, 290], [1163, 290]], [[310, 44], [974, 54]]],
+                           [[[0, 600]]]]
 
     def camera_movement(self, p1, p2, map_selected):
         self.index = self.game_maps.index(map_selected)
         self.p1 = p1
         self.p2 = p2
         self.map_selected = map_selected
-        self.map_rect = self.map_selected.get_rect(topleft=pygame.Vector2(self.pos[self.index]))
+        self.map_rect = self.map_selected.get_rect(topleft=pygame.Vector2(self.mapTopLeft[self.index]))
         self.screen.fill("blue")
         self.screen.blit(self.map_selected, self.map_rect)

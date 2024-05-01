@@ -156,7 +156,7 @@ class Fighter(pygame.sprite.Sprite):
         pass
 
     def update_animation(self, target):
-        animation_cooldown = 90
+        animation_cooldown = 60
         if self.stun:
             if self.stun_duration > 0:
                 self.stun_duration-=1
@@ -179,23 +179,24 @@ class Fighter(pygame.sprite.Sprite):
                 self.stun_timer = pygame.time.get_ticks()
 
         if self.hit:
-            if self.hit_do_once:
-                self.frame_index = 0
-                self.hit_do_once = False
-                # Updating attack list
-                self.frame_index_counter = [-1, 0]
-                for attack in self.attack_data.values():
-                    attack["trigger"] = False
-                for attack in self.attack_triggers.values():
-                    attack["trigger"] = False
+            self.attacking = False
+            # Updating attack list
+            self.frame_index_counter = [-1, 0]
+            for attack in self.attack_data.values():
+                attack["trigger"] = False
+            for attack in self.attack_triggers.values():
+                attack["trigger"] = False
 
-            if self.time_passed() > 150:
+            if self.hit_do_once:
+                self.hit_do_once = False
+                self.frame_index = 0
+
+            if self.time_passed() > 130:
                 self.frame_index += 1
                 self.update_time = pygame.time.get_ticks()
 
-            if self.frame_index > 1:
+            if self.frame_index >= 2:
                 self.hit = False
-                self.attacking = False
                 self.frame_index = 0
                 self.hit_do_once = True
 
@@ -356,19 +357,21 @@ class Fighter(pygame.sprite.Sprite):
         dx = 0
         dy = 0
         self.running = False
-
-        if not self.attacking or self.running:
-            if self.rect.centerx <= target.rect.centerx:
-                self.flip = False
-            else:
-                self.flip = True
-
         self.aiDelay += 1
 
         if not self.dead:
             if not self.attacking:
+                if abs(distx) > 200:
+                    self.running = True
                 if self.aiDelay > self.aiDifficulty:
                     self.aiDelay = 0
+
+                    # Flip
+                    if self.rect.centerx <= target.rect.centerx:
+                        self.flip = False
+                    else:
+                        self.flip = True
+
                     # Movement
                     if abs(distx) > 500 and self.stamina - self.stamina_cost >= 0:
                         # Dodging
@@ -377,12 +380,6 @@ class Fighter(pygame.sprite.Sprite):
                                 self.stamina -= self.stamina_cost
                                 self.sounds.sounds_dict["dash"]["list"][0].play().set_volume(0.3)
                             self.dash = True
-                    else:
-                        if abs(distx) > 200:
-                            self.running = True
-
-                    if self.running:
-                        dx += SPEED + (-2 * SPEED * self.flip)
 
                     # Jumping
                     if target.rect.bottom < self.camera.boundaries[self.camera.index][0][0][1]:
@@ -427,27 +424,23 @@ class Fighter(pygame.sprite.Sprite):
                             if self.attack_cooldown("normal_jump_attack"):
                                 self.attack_triggers["normal_jump_attack"]["trigger"] = True
 
-                    elif abs(distx) < 150 and abs(disty) < 100:
-                        # Combo Attacksa
-                        self.combo_attack_logic()
-
                     # Special Attack
-                    elif self.sp_level > 100 and distx < 400 and disty < 200:
-                        if self.attack_cooldown("special_attack_down"):
-                            self.attack_triggers["special_attack_down"]["trigger"] = True
+                    elif self.sp_level > 100 and distx < 400 and disty < 200 and self.attack_cooldown("special_attack_down"):
+                        self.attack_triggers["special_attack_down"]["trigger"] = True
 
                     # Strong Attacks
-                    elif 200 < distx < 400 and disty < 150:
-                        if self.attack_cooldown("strong_attack"):
-                            self.attack_triggers["strong_attack"]["trigger"] = True
+                    elif 150 < distx < 250 and disty < 150 and self.attack_cooldown("strong_attack"):
+                        self.attack_triggers["strong_attack"]["trigger"] = True
 
-                    elif 180 < distx < 300 and disty < 80:
-                        if self.attack_cooldown("strong_attack_up"):
-                            self.attack_triggers["strong_attack_up"]["trigger"] = True
+                    elif 180 < distx < 250 and disty < 80 and self.attack_cooldown("strong_attack_up"):
+                        self.attack_triggers["strong_attack_up"]["trigger"] = True
 
-                    elif distx < 200 and disty < 50 and target.block:
-                        if self.attack_cooldown("strong_attack_down"):
-                            self.attack_triggers["strong_attack_down"]["trigger"] = True
+                    elif distx < 200 and disty < 50 and target.block and self.attack_cooldown("strong_attack_down"):
+                        self.attack_triggers["strong_attack_down"]["trigger"] = True
+
+                    elif abs(distx) < 200 and abs(disty) < 100:
+                        # Combo Attacks
+                        self.combo_attack_logic()
 
                 for attack in self.attack_triggers.values():
                     if attack["trigger"]:
@@ -476,6 +469,9 @@ class Fighter(pygame.sprite.Sprite):
         else:
             self.in_air = True
 
+        if self.running:
+            dx += SPEED + (-2 * SPEED * self.flip)
+
         if self.dash:
             self.rect.x += 30 + (-60 * self.flip)
 
@@ -485,6 +481,8 @@ class Fighter(pygame.sprite.Sprite):
 
     def knockback_method(self):
         if self.knockback:
+            if self.block:
+                print("Block:", True)
             if pygame.time.get_ticks() - self.knockback_duration < 600:
                 self.rect.x += -8 + (16 * self.flip)
                 if not self.check_once_knockback:
@@ -572,10 +570,8 @@ class Fighter(pygame.sprite.Sprite):
         if self.rect.top > self.screen.get_height() + 400:
             self.health = 0
 
-        # for boundary in self.camera.boundaries[self.camera.index]:
-        #     if len(boundary) == 2:
-        #         pygame.draw.line(self.screen, "black", boundary[0], boundary[1], 3)
 
+        # Take damage from lava on 2nd map
         if self.camera.index == 1 and self.rect.bottom > self.camera.boundaries[self.camera.index][0][0][1] + 70:
             self.vel_y = - 30
             self.health -= 2
@@ -593,7 +589,7 @@ class Fighter(pygame.sprite.Sprite):
                 if self.camera.map_rect.right + rx < self.screen.get_width():
                     rx = self.screen.get_width() - self.camera.map_rect.right
 
-        self.camera.pos[self.camera.index][0] += rx
+        self.camera.mapTopLeft[self.camera.index][0] += rx
         for boundaries in self.camera.boundaries[self.camera.index]:
             for margins in boundaries:
                 margins[0] += rx
@@ -601,38 +597,43 @@ class Fighter(pygame.sprite.Sprite):
 
         # Vertical Movement
         resy = 0
+        fy = 10
+
+        # If you're in contact with the top of the screen
         if self.rect.top <= 10:
-            fy = 10
             if self.camera.map_rect.top + fy < 0:
                 resy += fy
             else:
-                fy = -self.camera.map_rect.top
-                resy += fy
+                resy += -self.camera.map_rect.top
 
-        boundaries = [[[[0, 550]]],
-                           [[[240, 540], [1062, 540]], [[534, 130], [620, 130]], [[-5, 318], [154, 318]], [[1213, 272], [1372, 272]]],
-                           [[[0, 550]], [[66, 293], [450, 293]], [[934, 293], [1318, 293]], [[202, 105], [1160, 105]]],
-                           [[[0, 550]], [[216, 290], [588, 290]], [[791, 290], [1163, 290]], [[310, 44], [974, 54]]]]
+        boundaries = [[[[0, 550]], [[66, 293], [450, 293]], [[934, 293], [1318, 293]], [[202, 105], [1160, 105]]],
+                           [[[240, 540], [1062, 540]], [[534, 130], [620, 130]], [[-5, 318], [154, 318]],
+                            [[1213, 272], [1372, 272]]],
+                           [[[0, 550]], [[216, 290], [588, 290]], [[791, 290], [1163, 290]], [[310, 44], [974, 54]]],
+                           [[[0, 600]]]]
 
-        if self.camera.boundaries[self.camera.index][0][0][1] + resy > boundaries[self.camera.index][0][0][1]:
-            if target.rect.bottom >= self.camera.boundaries[self.camera.index][0][0][1]:
-                fy = - 10
-                if self.camera.map_rect.bottom + fy > self.screen.get_height():
-                    resy += fy
-                else:
-                    fy = -self.camera.map_rect.bottom
-                    resy += fy
+        # When both players are on the ground the camera moves back into position
+        if self.rect.bottom == self.camera.boundaries[self.camera.index][0][0][1] == target.rect.bottom:
+            if self.camera.boundaries[self.camera.index][0][0][1] - fy < boundaries[self.camera.index][0][0][1]:
+                resy += boundaries[self.camera.index][0][0][1] - self.camera.boundaries[self.camera.index][0][0][1]
+            else:
+                resy -= 10
+
+        # Second map has no camera movmement
         if self.camera.index == 1:
             resy = 0
 
-        self.camera.pos[self.camera.index][1] += resy
-        still = False
+        # Update Y value for maps
+        self.camera.mapTopLeft[self.camera.index][1] += resy
+
+        # Moving the 'invisible' boundaries of platforms down
+        onPlatform = False
         for boundaries in self.camera.boundaries[self.camera.index]:
             for margins in boundaries:
                 if boundaries[0][1] == self.rect.bottom:
-                    still = True
+                    onPlatform = True
                 margins[1] += resy
-        if still:
+        if onPlatform:
             self.rect.y += resy
 
         # Islands and Stuff

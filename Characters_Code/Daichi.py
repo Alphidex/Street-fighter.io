@@ -202,9 +202,8 @@ class Daichi(Fighter):
 
             if self.attack_data["strong_attack_down"]["trigger"]:
                 if self.frame_index < 2:
-                    self.rect.x += 4 - (8 * self.flip)
-                    self.rect.y -= 8
-                    self.vel_y = 0
+                    self.rect.x += 5 - (10 * self.flip)
+                    self.vel_y = -9
                     if self.frame_index < 5:
                         self.rect.x += 6 - (12 * self.flip)
 
@@ -391,12 +390,6 @@ class Daichi(Fighter):
                     if self.frame_index >= 3:
                         self.frame_index = 2
                 else:
-                    if pygame.time.get_ticks() - self.stun_time_started < self.stun_timer:
-                        if self.frame_index >= 3:
-                            self.frame_index = 3
-                    else:
-                        self.opponent.stun = False
-
                     if self.frame_index >= len(self.attack_animation_list[self.action]) - 1:
                         self.kill()
 

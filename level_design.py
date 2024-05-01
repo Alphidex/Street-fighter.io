@@ -55,7 +55,7 @@ class Level_Design:
     def round_countdown(self):
         font = pygame.font.Font("./Fonts/retro.ttf", 80)
         text = f"{self.round_duration_time // 60} : {self.round_duration_time % 60}"
-        text_surface = font.render(text, False, "#db130f")
+        text_surface = font.render(text, False, "#990b06")
         rect = text_surface.get_rect(topleft=(620, 20))
         
         # Draw the countdown
@@ -70,9 +70,9 @@ class Level_Design:
 
     def display_fight_text(self):
         font = pygame.font.Font("./Fonts/retro.ttf", 80)
-        round_text = font.render(f"Round: {self.current_round}", True, "white")
+        round_text = font.render(f"Round: {self.current_round}", True, "#990b06")
         round_text_pos = (550, 300)
-        fight_text = font.render(f"Fight!", True, "white")
+        fight_text = font.render(f"Fight!", True, "#990b06")
         fight_text_pos = (550, 300)
         text_list = [round_text, fight_text]
         text_pos_list = [round_text_pos, fight_text_pos]
@@ -116,7 +116,7 @@ class Level_Design:
             self.round_won_timer = pygame.time.get_ticks()
         else:
             font = pygame.font.Font("./Fonts/retro.ttf", 100)
-            text = font.render(f"{self.rnd_win_text} Won!", True, "green")
+            text = font.render(f"{self.rnd_win_text} Won!", True, "#990b06")
 
             if pygame.time.get_ticks() - self.round_won_timer < 1200 and self.p1_rounds_won <= 1 and self.p2_rounds_won <= 1:
                 self.screen.blit(text, (550, 300))
@@ -130,6 +130,8 @@ class Level_Design:
                 self.round_duration_time = 180
                 self.round_over = False
                 self.current_round += 1
+
+
 
     def won_rounds_circles(self):
         circle_pos = [(450, 170), (490, 160), (830, 160), (870, 170)]
@@ -166,7 +168,7 @@ class Level_Design:
             if self.current_match < self.max_matches:
                 # Draw match won text
                 font = pygame.font.Font("./Fonts/retro.ttf", 120)
-                text = font.render("Match Won!", False, "green")
+                text = font.render("Match Won!", False, "#990b06")
 
                 if pygame.time.get_ticks() - self.match_won_timer < 2000:
                     self.screen.blit(text, (550, 300))
@@ -187,7 +189,7 @@ class Level_Design:
             else:
                 text = "Player 2"
             font = pygame.font.Font("./Fonts/retro.ttf", 80)
-            text = font.render(f"{text} WON THE MATCH!", True, "red")
+            text = font.render(f"{text} WON THE MATCH!", True, "#990b06")
 
             if pygame.time.get_ticks() - self.match_won_timer < 2000:
                 self.screen.blit(text, (200, 300))
@@ -199,7 +201,7 @@ class Level_Design:
             if self.current_match >= self.max_matches and self.p1_rounds_won >= 2:
                 # Draw match won text
                 font = pygame.font.Font("./Fonts/retro.ttf", 90)
-                text = font.render("Congratulations!", True, "black")
+                text = font.render("Congratulations!", True, "#990b06")
 
                 if not self.do_once_match:
                     self.do_once_match = True
@@ -213,7 +215,7 @@ class Level_Design:
             if self.match_lost:
                 # Draw match won text
                 font = pygame.font.Font("./Fonts/retro.ttf", 90)
-                text = font.render("You Lost!", True, "black")
+                text = font.render("You Lost!", True, "#990b06")
 
                 if not self.do_once_match:
                     self.do_once_match = True

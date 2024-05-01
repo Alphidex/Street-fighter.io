@@ -26,8 +26,6 @@ class Select_Rect:
             pygame.draw.lines(self.screen, (122, 213, 50), True, (pos_1, pos_2, pos_3, pos_4), 2)
             debug(f"Topleft: {self.topleft}")
             debug(f"Bottomright: {self.bottomright}", 50)
-            print(f"Topleft: {self.topleft}")
-            print(f"Bottomright: {self.bottomright}\n")
         else:
             self.topleft = None
 

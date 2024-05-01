@@ -10,17 +10,17 @@ from debug import debug
 
 class Game:
     def __init__(self):
-        # Key Game Variables
-        self.exit_game = False  # If the Exit button is pressed in the Main menu
-        self.reset = False  # Reset the game once all levels are complete
-
         # Display
         self.screen = pygame.display.get_surface()  # Screen Surface
 
         # Menu
         self.start_selected = False  # Check if the start button is pressed
-        self.fadeInButtonClicked = [False, None]  # PVE and PVP fade in once Start button is pressed, and this variable
+        self.gameMode = [False, None]  # PVE and PVP fade in once Start button is pressed, and this variable
         # is responsible for checking which one is pressed
+
+        # Key Game Variables
+        self.exit_game = False  # If the Exit button is pressed in the Main menu
+        self.reset = False  # Reset the game once all levels are complete
 
         # Groups
         # Instantiated a few groups (code is in the support file), I am using a dictionary as it provides O(1)
@@ -76,11 +76,10 @@ class Game:
         self.events = events
 
         # Selection Statements
-        if not self.fadeInButtonClicked[0]:
+        if not self.gameMode[0]:
             # Options
             if self.options_entered:
-                self.options_entered = not(self.options.options(events, self.options_entered)) # Using not as self.quit
-                # is returned
+                self.options_entered = self.options.options(events, self.options_entered)
 
                 # Destroy all the sprites once you quit options
                 if not self.options_entered:
@@ -88,7 +87,7 @@ class Game:
                         sprite.kill()
             # Main Menu
             else:
-                self.start_menu(events)
+                self.displayTitleScreen(events)
 
         # Map Selection
         elif not self.map_management.map_selection_complete:
@@ -99,11 +98,11 @@ class Game:
 
         # Fighter Selection
         elif not self.fighters_selection_complete:
-            self.fighters_selection.run(events, self.fadeInButtonClicked[1])
+            self.fighters_selection.run(events, self.gameMode[1])
             self.fighters_selection_complete, self.fighter_1, self.fighter_2 = self.fighters_selection.selection_complete()
             if self.fighters_selection_complete:
                 # Initialize the level design and the camera classes
-                self.level = Level_Design(self.fighter_1, self.fighter_2, self.fighters_pos, self.map_management, self.fadeInButtonClicked[1])
+                self.level = Level_Design(self.fighter_1, self.fighter_2, self.fighters_pos, self.map_management, self.gameMode[1])
                 self.camera = Camera_Management(self.map_management.game_maps)
 
         # Arena
@@ -112,7 +111,7 @@ class Game:
                 self.arena()
                 self.pause_menu(events)
 
-    def start_menu(self, events):
+    def displayTitleScreen(self, events):
         # Check before all sprites are created (to prevent the declaration of new sprites repeatedly)
         if len(self.groups["Objs"].sprites()) == 0:
             draw_bg(self.screen, self.start_menu_bg) # Start menu BG
@@ -157,7 +156,7 @@ class Game:
             # Check whether PvE or PvP is selected
             for sprite in self.groups["FadeInBts"].sprites():
                 if sprite.clicked:
-                    self.fadeInButtonClicked = [True, sprite.text]
+                    self.gameMode = [True, sprite.text]
                     for button in self.groups["FadeInBts"].sprites():
                         button.kill()
                     break
@@ -218,6 +217,15 @@ class Game:
                 self.fighter_2.run(self.fighter_1, self.events, self.camera, self.level.current_match)
             # Update the level class
             self.level.run(self.fighter_1.health, self.fighter_2.health)
+
+            # Reset the camera back to initial position after a round ends
+            if self.level.round_over:
+                self.camera.mapTopLeft = [[-110, -145], [-110, -140], [-110, -150], [-110, -180]]
+                self.camera.boundaries = [[[[0, 550]], [[66, 293], [450, 293]], [[934, 293], [1318, 293]], [[202, 105], [1160, 105]]],
+                           [[[240, 540], [1062, 540]], [[534, 130], [620, 130]], [[-5, 318], [154, 318]],
+                            [[1213, 272], [1372, 272]]],
+                           [[[0, 550]], [[216, 290], [588, 290]], [[791, 290], [1163, 290]], [[310, 44], [974, 54]]],
+                           [[[0, 600]]]]
 
             # Screen Shake
             screen_shake_offset = [0, 0]

@@ -292,7 +292,7 @@ class Renji(Fighter):
                     self.update_action(attack["action"])
         elif self.dash:
             self.update_action(23)
-        elif (self.jump[0] == True) or (self.jump[1] == True):
+        elif self.jump[0] or self.jump[1]:
             self.update_action(13)
         elif self.running:
             self.update_action(12)
@@ -308,7 +308,7 @@ class Renji(Fighter):
         # Update the animation frame index at certain milliseconds
         self.update_animation(target)
 
-        # Checks for attacks like when it happens, etc.
+        # Checks for attacks e.g. when it happens, etc.
         self.attacks_management(surface, target)
 
         # If the end of the animation is reached

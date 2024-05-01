@@ -180,10 +180,6 @@ class Asuka(Fighter):
                 if not target.block:
                     target.hit = True
 
-                    # Knockbacks
-                    if self.attack_data["normal_attack_up"]["trigger"] or self.attack_data["strong_attack_down"]["trigger"]:
-                        target.knockback = True
-
                     # Taking Damage
                     for attack in self.attack_data.values():
                         if attack["trigger"]:
@@ -358,7 +354,7 @@ class Asuka(Fighter):
                     self.rect.y - 50 - offset_y))
 
         def update_ranged_attack(self, surface):
-            animation_cooldown = 160
+            animation_cooldown = 140
 
             # Refresh the image
             self.image = self.attack_animation_list[self.action][self.frame_index]

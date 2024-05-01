@@ -120,7 +120,7 @@ class Options:
 
         self.options_key_binds_entered(font2, mouse_pos, mouse_press, click)
 
-        return self.quit
+        return not self.quit
 
     def options_volume_entered(self, font, mouse_pos, mouse_press, click):
         if self.volume_entered:

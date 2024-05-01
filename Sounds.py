@@ -38,7 +38,7 @@ class Sounds:
 
     def play_music(self):
         # Background music
-        pygame.mixer.music.load("./Sound Effects/ds3.mp3")
+        pygame.mixer.music.load("./Sound Effects/crimsonSpire.mp3")
         pygame.mixer.music.play(-1)
         pygame.mixer.music.set_volume(self.volume)
 

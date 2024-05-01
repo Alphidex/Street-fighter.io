@@ -42,3 +42,12 @@ while running:
 
 # Quit Pygame
 pygame.quit()
+
+
+"""
+Syntax Issues:
+1. Camera Management has copies of map position and boundaries in game.py (function arena) where I'm resetting the
+ positions and characters.py, where I'm checking for boundary collisions. For some reason, can't make them constants,
+ as they change along with their copies. 
+
+"""
