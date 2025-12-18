@@ -7,7 +7,7 @@
 
 ## Preview
 
-<div>
+<div style="display:flex;">
 <img src="./Images/menu.png" alt="Main Menu Demo" width="430">
 <img src="./Images/arena.png" alt="Arena Demo" width="400">
 </div>
